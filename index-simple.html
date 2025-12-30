@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>VGMEDIA - Đơn giản</title>
+    <style>
+        body { background:#121212; color:white; font-family:Arial; margin:0; padding:20px; }
+        .header { display:flex; justify-content:space-between; align-items:center; padding:20px 0; }
+        .logo { font-size:2rem; font-weight:bold; color:#6C63FF; }
+        .user-menu { display:flex; align-items:center; gap:10px; }
+        .main { text-align:center; padding:50px 20px; }
+        .btn { padding:15px 30px; background:#6C63FF; color:white; border:none; border-radius:10px; margin:10px; cursor:pointer; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">VGMEDIA</div>
+        <div class="user-menu" id="userMenu">
+            <span id="userName">Khách</span>
+            <button onclick="logout()" id="logoutBtn">Đăng xuất</button>
+            <button onclick="goToLogin()" id="loginBtn">Đăng nhập</button>
+        </div>
+    </div>
+    
+    <div class="main">
+        <h1 id="welcomeMessage">Chào mừng đến VGMEDIA</h1>
+        <div id="content"></div>
+    </div>
+
+    <script src="./js/auth-simple.js"></script>
+    <script>
+        // Check login on load
+        function checkLogin() {
+            const user = window.simpleGetCurrentUser ? window.simpleGetCurrentUser() : null;
+            
+            if (user) {
+                document.getElementById('userName').textContent = user.name;
+                document.getElementById('loginBtn').style.display = 'none';
+                document.getElementById('logoutBtn').style.display = 'block';
+                document.getElementById('welcomeMessage').textContent = `Xin chào, ${user.name}!`;
+                
+                // Show content for logged in users
+                document.getElementById('content').innerHTML = `
+                    <h2>🎵 Thư viện nhạc</h2>
+                    <button class="btn" onclick="goToAdmin()">Quản lý bài hát</button>
+                    <button class="btn" onclick="showSongs()">Xem bài hát</button>
+                `;
+            } else {
+                document.getElementById('loginBtn').style.display = 'block';
+                document.getElementById('logoutBtn').style.display = 'none';
+                document.getElementById('content').innerHTML = `
+                    <p>Vui lòng đăng nhập để sử dụng</p>
+                    <button class="btn" onclick="goToLogin()">Đăng nhập ngay</button>
+                `;
+            }
+        }
+        
+        function goToLogin() {
+            window.location.href = './login-simple.html';
+        }
+        
+        function goToAdmin() {
+            window.location.href = './admin.html';
+        }
+        
+        function logout() {
+            if (window.simpleLogout) {
+                window.simpleLogout();
+            }
+            localStorage.removeItem('vgmedia_user');
+            checkLogin();
+        }
+        
+        function showSongs() {
+            const songs = JSON.parse(localStorage.getItem('vgmedia_music_library') || '[]');
+            let html = '<h3>Danh sách bài hát:</h3>';
+            
+            if (songs.length === 0) {
+                html += '<p>Chưa có bài hát nào</p>';
+            } else {
+                songs.forEach(song => {
+                    html += `
+                        <div style="background:rgba(255,255,255,0.1); padding:10px; margin:10px; border-radius:10px;">
+                            <strong>${song.title}</strong> - ${song.artist}
+                        </div>
+                    `;
+                });
+            }
+            
+            document.getElementById('content').innerHTML = html;
+        }
+        
+        // Auto check login
+        document.addEventListener('DOMContentLoaded', checkLogin);
+        setInterval(checkLogin, 1000);
+    </script>
+</body>
+</html>
