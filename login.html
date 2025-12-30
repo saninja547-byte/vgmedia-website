@@ -475,61 +475,27 @@
             });
             
             // User Login Form Submission
-            userLoginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const username = document.getElementById('userUsername').value.trim();
-                const password = document.getElementById('userPassword').value;
-                const messageEl = document.getElementById('userMessage');
-                const submitBtn = document.getElementById('userSubmitBtn');
-                const loading = document.getElementById('userLoading');
-                const btnText = submitBtn.querySelector('span');
-                
-                // Reset message
-                messageEl.className = 'message';
-                messageEl.textContent = '';
-                
-                // Validate
-                if (!username || !password) {
-                    showError('userMessage', 'Vui lòng điền đầy đủ thông tin');
-                    return;
-                }
-                
-                // Show loading
-                btnText.textContent = 'Đang đăng nhập...';
-                loading.classList.add('active');
-                submitBtn.disabled = true;
-                
-                // Perform login
-                setTimeout(() => {
-                    // Call login function from auth.js
-                    const result = login(username, password);
-                    
-                    if (result.success) {
-                        showSuccess('userMessage', 'Đăng nhập thành công! Đang chuyển hướng...');
-                        
-                        // Store remember me
-                        const rememberMe = document.getElementById('rememberMe').checked;
-                        if (rememberMe) {
-                            localStorage.setItem('vgmedia_remember_user', username);
-                        }
-                        
-                        // Redirect based on user type
-                        setTimeout(() => {
-                            if (result.user.type === 'admin') {
-                                window.location.href = 'admin.html';
-                            } else {
-                                window.location.href = 'index.html';
-                            }
-                        }, 1000);
-                    } else {
-                        showError('userMessage', result.message || 'Đăng nhập thất bại');
-                        btnText.textContent = 'Đăng nhập';
-                        loading.classList.remove('active');
-                        submitBtn.disabled = false;
-                    }
-                }, 1000);
-            });
+            if (result.success) {
+    showSuccess('userMessage', 'Đăng nhập thành công! Đang chuyển hướng...');
+    
+    // QUAN TRỌNG: Thêm timeout và force redirect
+    setTimeout(() => {
+        // Lưu thông tin đăng nhập vào sessionStorage (nhanh hơn)
+        sessionStorage.setItem('vgmedia_login_time', Date.now());
+        sessionStorage.setItem('vgmedia_username', username);
+        
+        // Force redirect với cache busting
+        const timestamp = Date.now();
+        
+        if (result.user.type === 'admin') {
+            // Admin chuyển đến admin.html
+            window.location.href = './admin.html?login=' + timestamp;
+        } else {
+            // User chuyển đến index.html với library section
+            window.location.href = './index.html?login=' + timestamp + '&user=' + username + '#library';
+        }
+    }, 1500);
+}
             
             // Admin Login Form Submission
             adminLoginForm.addEventListener('submit', function(e) {
