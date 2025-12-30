@@ -19,181 +19,260 @@
                 </div>
                 
                 <div class="nav-links">
-                    <a href="#" class="nav-link active"><i class="fas fa-home"></i> Trang chủ</a>
-                    <a href="#library" class="nav-link"><i class="fas fa-music"></i> Thư viện</a>
-                    <a href="#trending" class="nav-link"><i class="fas fa-fire"></i> Trending</a>
-                    <a href="./admin.html" class="nav-link" id="adminLink" style="display: none;"><i class="fas fa-cog"></i> Quản lý</a>
+                    <a href="#player" class="nav-link active">Trang chủ</a>
+                    <a href="#library" class="nav-link">Thư viện</a>
+                    <a href="#trending" class="nav-link">Trending</a>
+                    <a href="./admin.html" class="nav-link" id="adminLink" style="display:none;">Quản lý</a>
                 </div>
                 
                 <div class="nav-actions">
-                    <button class="btn-subscribe" id="subscribeBtn">
-                        <i class="fas fa-crown"></i> Nâng cấp Premium
-                    </button>
-                    <div class="user-menu" id="userMenu" style="display: none;">
-                        <span id="userName">Khách</span>
+                    <div class="user-menu" id="userMenu" style="display:none;">
+                        <span id="userName">User</span>
                         <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
                     </div>
-                    <button class="btn-login" id="loginBtn">
-                        <i class="fas fa-sign-in-alt"></i> Đăng nhập
-                    </button>
+                    <button class="btn-login" id="loginBtn">Đăng nhập</button>
                 </div>
             </nav>
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="main-content">
-        <div class="container player-container">
-            <!-- Player Card -->
-            <div class="player-card">
-                <!-- Song Info -->
-                <div class="song-info">
-                    <div class="song-thumbnail">
-                        <img id="currentThumbnail" src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f" alt="Song Thumbnail">
-                        <div class="song-badge premium" id="currentBadge">PREMIUM</div>
-                    </div>
-                    
-                    <div class="song-details">
-                        <h2 class="song-title" id="currentTitle">Chào mừng đến VGMEDIA</h2>
-                        <p class="song-artist" id="currentArtist">Hãy đăng nhập để bắt đầu</p>
-                        
-                        <div class="song-actions">
-                            <button class="btn-action btn-play" id="playBtn" onclick="window.location.href='./login.html'">
-                                <i class="fas fa-sign-in-alt"></i> Đăng nhập ngay
-                            </button>
-                            <button class="btn-action btn-like" onclick="window.location.href='./admin.html'">
-                                <i class="fas fa-cog"></i> Trang quản lý
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Music Library -->
-            <div class="music-library">
-                <div class="library-header">
-                    <h3><i class="fas fa-music"></i> Bài hát mẫu</h3>
-                </div>
-                
-                <div class="songs-list">
-                    <!-- Demo songs -->
-                    <div class="song-item" onclick="showLoginAlert()">
-                        <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f" class="song-item-img">
-                        <div class="song-item-info">
-                            <div class="song-item-title">Summer Vibes 2024</div>
-                            <div class="song-item-artist">VG Music Collective</div>
-                            <div class="song-item-meta">
-                                <span>3:45</span>
-                                <span>EDM</span>
-                            </div>
-                        </div>
-                        <div class="song-item-price premium">199,000đ</div>
-                    </div>
-                    
-                    <div class="song-item" onclick="showLoginAlert()">
-                        <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d" class="song-item-img">
-                        <div class="song-item-info">
-                            <div class="song-item-title">Midnight Drive</div>
-                            <div class="song-item-artist">Night Riders</div>
-                            <div class="song-item-meta">
-                                <span>4:20</span>
-                                <span>Synthwave</span>
-                            </div>
-                        </div>
-                        <div class="song-item-price free">Miễn phí</div>
-                    </div>
+        <div class="container">
+            <div id="contentArea">
+                <!-- Nội dung sẽ được load động -->
+                <div style="text-align:center; padding:100px 20px;">
+                    <h1 id="statusMessage">🎵 Đang kiểm tra đăng nhập...</h1>
+                    <p id="statusDetail">Vui lòng đợi trong giây lát</p>
+                    <div id="actionButtons" style="margin-top:30px;"></div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <h2>VG<span>MEDIA</span></h2>
-                    <p>Nền tảng nhạc chất lượng cao hàng đầu Việt Nam</p>
-                </div>
-            </div>
-            
             <div class="footer-bottom">
-                <p>&copy; 2024 VGMEDIA. All rights reserved.</p>
+                <p>&copy; 2024 VGMEDIA</p>
             </div>
         </div>
     </footer>
 
-    <!-- JavaScript -->
     <script>
-        // Check login status
-        function checkLogin() {
-            const auth = localStorage.getItem('vgmedia_auth');
-            if (auth) {
+        // FIXED: Kiểm tra login mạnh mẽ
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 Checking login status...');
+            
+            // Kiểm tra nhiều nguồn
+            checkLoginFromMultipleSources();
+        });
+        
+        function checkLoginFromMultipleSources() {
+            const statusMessage = document.getElementById('statusMessage');
+            const statusDetail = document.getElementById('statusDetail');
+            const actionButtons = document.getElementById('actionButtons');
+            
+            // Nguồn 1: localStorage
+            let authData = localStorage.getItem('vgmedia_auth');
+            
+            // Nguồn 2: Kiểm tra URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const loginParam = urlParams.get('login');
+            
+            // Nguồn 3: sessionStorage
+            const sessionLogin = sessionStorage.getItem('vgmedia_login_time');
+            
+            console.log('Auth sources:', {
+                localStorage: authData ? 'Exists' : 'None',
+                urlParam: loginParam,
+                sessionStorage: sessionLogin
+            });
+            
+            // Ưu tiên: Nếu có URL parameter, force sử dụng localStorage
+            if (loginParam || sessionLogin) {
+                console.log('Login detected from URL/session');
+                
+                if (!authData) {
+                    // Thử lấy từ default users
+                    try {
+                        const users = JSON.parse(localStorage.getItem('vgmedia_users') || '[]');
+                        const defaultUser = users.find(u => u.username === 'user');
+                        if (defaultUser) {
+                            const { password, ...userWithoutPass } = defaultUser;
+                            localStorage.setItem('vgmedia_auth', JSON.stringify(userWithoutPass));
+                            authData = localStorage.getItem('vgmedia_auth');
+                            console.log('Auto-logged with default user');
+                        }
+                    } catch (e) {
+                        console.error('Auto-login failed:', e);
+                    }
+                }
+            }
+            
+            if (authData) {
                 try {
-                    const user = JSON.parse(auth);
-                    document.getElementById('userName').textContent = user.name;
+                    const user = JSON.parse(authData);
+                    console.log('User found:', user.name);
+                    
+                    // CẬP NHẬT UI
+                    statusMessage.innerHTML = `🎉 Chào mừng trở lại, <span style="color:#6C63FF">${user.name}</span>!`;
+                    statusDetail.textContent = 'Đang tải thư viện nhạc...';
+                    
+                    // Cập nhật header
                     document.getElementById('userMenu').style.display = 'flex';
+                    document.getElementById('userName').textContent = user.name;
                     document.getElementById('loginBtn').style.display = 'none';
                     
                     if (user.type === 'admin') {
-                        document.getElementById('adminLink').style.display = 'flex';
+                        document.getElementById('adminLink').style.display = 'block';
                     }
                     
-                    if (user.isPremium) {
-                        document.getElementById('subscribeBtn').innerHTML = '<i class="fas fa-crown"></i> Premium Member';
-                    }
+                    // Hiển thị nút hành động
+                    actionButtons.innerHTML = `
+                        <button class="btn-action btn-play" onclick="loadMusicLibrary()" style="margin:10px;">
+                            <i class="fas fa-music"></i> Xem thư viện nhạc
+                        </button>
+                        <button class="btn-action btn-like" onclick="goToAdmin()" style="margin:10px;">
+                            <i class="fas fa-cog"></i> Trang quản lý
+                        </button>
+                    `;
                     
-                    // Auto redirect to library if logged in
+                    // Tự động load thư viện sau 1 giây
                     setTimeout(() => {
-                        window.location.href = '#library';
+                        loadMusicLibrary();
                     }, 1000);
                     
                 } catch (e) {
-                    console.error('Auth parse error:', e);
+                    console.error('Error parsing auth:', e);
+                    showLoginPrompt();
                 }
+            } else {
+                console.log('No user logged in');
+                showLoginPrompt();
             }
         }
         
-        // Setup event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            checkLogin();
+        function showLoginPrompt() {
+            const statusMessage = document.getElementById('statusMessage');
+            const statusDetail = document.getElementById('statusDetail');
+            const actionButtons = document.getElementById('actionButtons');
             
-            // Login button
-            document.getElementById('loginBtn').addEventListener('click', function() {
-                window.location.href = './login.html';
-            });
+            statusMessage.innerHTML = '🎵 Chào mừng đến VGMEDIA';
+            statusDetail.innerHTML = 'Đăng nhập để truy cập thư viện nhạc chất lượng cao';
             
-            // Logout button
-            document.getElementById('logoutBtn').addEventListener('click', function() {
-                if (confirm('Đăng xuất?')) {
-                    localStorage.removeItem('vgmedia_auth');
-                    location.reload();
+            actionButtons.innerHTML = `
+                <button class="btn-action btn-play" onclick="goToLogin()" style="margin:10px;">
+                    <i class="fas fa-sign-in-alt"></i> Đăng nhập ngay
+                </button>
+                <button class="btn-action btn-like" onclick="goToAdmin()" style="margin:10px;">
+                    <i class="fas fa-cog"></i> Trang quản lý (Admin)
+                </button>
+                <div style="margin-top:30px; background:rgba(108,99,255,0.1); padding:20px; border-radius:10px;">
+                    <h4><i class="fas fa-key"></i> Tài khoản demo:</h4>
+                    <p><strong>Admin:</strong> admin / admin123</p>
+                    <p><strong>User:</strong> user / user123</p>
+                    <p><strong>Premium:</strong> premium / premium123</p>
+                </div>
+            `;
+            
+            // Hiển thị login button
+            document.getElementById('loginBtn').style.display = 'block';
+            document.getElementById('userMenu').style.display = 'none';
+        }
+        
+        function loadMusicLibrary() {
+            const contentArea = document.getElementById('contentArea');
+            
+            // Tạo player và library
+            contentArea.innerHTML = `
+                <div class="player-container">
+                    <div class="player-card">
+                        <h2><i class="fas fa-headphones"></i> Player</h2>
+                        <p>Đang tải player...</p>
+                    </div>
+                    
+                    <div class="music-library">
+                        <div class="library-header">
+                            <h3><i class="fas fa-music"></i> Thư viện nhạc</h3>
+                        </div>
+                        <div class="songs-list" id="songsList">
+                            <div class="loading">Đang tải bài hát...</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Load songs từ music-data.js
+            loadSongs();
+        }
+        
+        function loadSongs() {
+            try {
+                const songs = JSON.parse(localStorage.getItem('vgmedia_music_library') || '[]');
+                const songsList = document.getElementById('songsList');
+                
+                if (songs.length === 0) {
+                    songsList.innerHTML = `
+                        <div style="text-align:center; padding:40px; color:#8A8A8A;">
+                            <i class="fas fa-music" style="font-size:3rem; opacity:0.3;"></i>
+                            <p>Chưa có bài hát nào</p>
+                            <button onclick="goToAdmin()" class="btn-action" style="margin-top:20px;">
+                                <i class="fas fa-plus"></i> Thêm bài hát mới
+                            </button>
+                        </div>
+                    `;
+                    return;
                 }
-            });
-            
-            // Subscribe button
-            document.getElementById('subscribeBtn').addEventListener('click', function() {
-                const auth = localStorage.getItem('vgmedia_auth');
-                if (!auth) {
-                    alert('Vui lòng đăng nhập để nâng cấp!');
-                    window.location.href = './login.html';
-                } else {
-                    alert('Tính năng đang phát triển!');
-                }
-            });
+                
+                let html = '';
+                songs.forEach(song => {
+                    html += `
+                        <div class="song-item" onclick="playSong(${song.id})">
+                            <img src="${song.thumbnail || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f'}" 
+                                 class="song-item-img">
+                            <div class="song-item-info">
+                                <div class="song-item-title">${song.title}</div>
+                                <div class="song-item-artist">${song.artist}</div>
+                                <div class="song-item-meta">
+                                    <span>${song.duration || '3:30'}</span>
+                                    <span>${song.genre || 'EDM'}</span>
+                                </div>
+                            </div>
+                            <div class="song-item-price ${song.type === 'free' ? 'free' : 'premium'}">
+                                ${song.type === 'free' ? 'Miễn phí' : song.price ? song.price.toLocaleString('vi-VN') + 'đ' : '199,000đ'}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                songsList.innerHTML = html;
+            } catch (e) {
+                console.error('Error loading songs:', e);
+            }
+        }
+        
+        function playSong(songId) {
+            alert('Tính năng phát nhạc đang được kích hoạt. Song ID: ' + songId);
+        }
+        
+        function goToLogin() {
+            window.location.href = './login.html';
+        }
+        
+        function goToAdmin() {
+            window.location.href = './admin.html';
+        }
+        
+        // Logout function
+        document.getElementById('logoutBtn')?.addEventListener('click', function() {
+            if (confirm('Đăng xuất?')) {
+                localStorage.removeItem('vgmedia_auth');
+                sessionStorage.removeItem('vgmedia_login_time');
+                location.reload();
+            }
         });
         
-        function showLoginAlert() {
-            const auth = localStorage.getItem('vgmedia_auth');
-            if (!auth) {
-                if (confirm('Vui lòng đăng nhập để nghe nhạc!\nChuyển đến trang đăng nhập?')) {
-                    window.location.href = './login.html';
-                }
-            }
-        }
-        
-        // Auto check login every 2 seconds
-        setInterval(checkLogin, 2000);
+        // Login button
+        document.getElementById('loginBtn').addEventListener('click', goToLogin);
     </script>
 </body>
 </html>
