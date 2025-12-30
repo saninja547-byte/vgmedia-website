@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VGMEDIA Admin - Quản lý bài hát</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/admin.css">
+    <title>Quản lý bài hát - VGMEDIA</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -18,187 +18,147 @@
             </div>
             
             <nav class="admin-nav">
-                <a href="#" class="admin-nav-link active" data-section="songs">
+                <a href="#" class="admin-nav-link active">
                     <i class="fas fa-music"></i> Quản lý bài hát
                 </a>
-                <a href="#" class="admin-nav-link" data-section="users">
-                    <i class="fas fa-users"></i> Quản lý người dùng
-                </a>
-                <a href="index.html" class="admin-nav-link">
+                <a href="./index.html" class="admin-nav-link">
                     <i class="fas fa-home"></i> Về trang chủ
                 </a>
             </nav>
             
             <div class="admin-user">
                 <span id="adminUsername">Quản trị viên</span>
-                <button id="adminLogout"><i class="fas fa-sign-out-alt"></i></button>
             </div>
         </div>
         
         <!-- Main Content -->
         <div class="admin-main">
-            <!-- Songs Management Section -->
-            <div class="admin-section active" id="songsSection">
-                <header class="admin-header">
-                    <h1><i class="fas fa-music"></i> Quản lý bài hát VGMEDIA</h1>
-                    <div class="admin-actions">
-                        <button class="btn-admin btn-add-song" id="addSongBtn">
-                            <i class="fas fa-plus"></i> Thêm bài hát mới
-                        </button>
-                    </div>
-                </header>
-                
-                <div class="admin-content">
-                    <!-- Search and Filter -->
-                    <div class="admin-toolbar">
-                        <div class="search-box">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="searchSongs" placeholder="Tìm kiếm bài hát...">
-                        </div>
-                        
-                        <div class="filter-options">
-                            <select id="filterType">
-                                <option value="all">Tất cả bài hát</option>
-                                <option value="premium">Premium</option>
-                                <option value="free">Miễn phí</option>
-                            </select>
-                        </div>
+            <header class="admin-header">
+                <h1><i class="fas fa-music"></i> Quản lý bài hát VGMEDIA</h1>
+                <div class="admin-actions">
+                    <button class="btn-admin btn-add-song" id="addSongBtn">
+                        <i class="fas fa-plus"></i> Thêm bài hát mới
+                    </button>
+                </div>
+            </header>
+            
+            <div class="admin-content">
+                <!-- Search and Filter -->
+                <div class="admin-toolbar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchSongs" placeholder="Tìm kiếm bài hát...">
                     </div>
                     
-                    <!-- Songs Table -->
-                    <div class="admin-table-container">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Bài hát</th>
-                                    <th>Nghệ sĩ</th>
-                                    <th>Thể loại</th>
-                                    <th>Loại</th>
-                                    <th>Giá (VND)</th>
-                                    <th>Thời lượng</th>
-                                    <th>Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody id="songsTableBody">
-                                <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
-                            </tbody>
-                        </table>
+                    <div class="filter-options">
+                        <select id="filterType">
+                            <option value="all">Tất cả bài hát</option>
+                            <option value="premium">Premium</option>
+                            <option value="free">Miễn phí</option>
+                        </select>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Users Management Section -->
-            <div class="admin-section" id="usersSection">
-                <header class="admin-header">
-                    <h1><i class="fas fa-users"></i> Quản lý người dùng</h1>
-                </header>
                 
-                <div class="admin-content">
-                    <div class="admin-table-container">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Tên người dùng</th>
-                                    <th>Email</th>
-                                    <th>Loại tài khoản</th>
-                                    <th>Ngày đăng ký</th>
-                                    <th>Trạng thái</th>
-                                </tr>
-                            </thead>
-                            <tbody id="usersTableBody">
-                                <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
+                <!-- Songs Table -->
+                <div class="admin-table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Bài hát</th>
+                                <th>Nghệ sĩ</th>
+                                <th>Thể loại</th>
+                                <th>Loại</th>
+                                <th>Giá (VND)</th>
+                                <th>Thời lượng</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="songsTableBody">
+                            <!-- Data loaded by JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-            
-            <!-- Edit Modal -->
-            <div id="editModal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3><i class="fas fa-edit"></i> <span id="modalTitle">Chỉnh sửa bài hát</span></h3>
-                        <span class="modal-close">&times;</span>
-                    </div>
-                    <div class="modal-body">
-                        <form id="editSongForm">
-                            <input type="hidden" id="editSongId">
-                            
-                            <div class="form-group">
-                                <label for="editTitle">Tên bài hát *</label>
-                                <input type="text" id="editTitle" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="editArtist">Nghệ sĩ *</label>
-                                <input type="text" id="editArtist" required>
-                            </div>
-                            
-                            <div class="form-row">
+                
+                <!-- Edit Modal -->
+                <div id="editModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3><i class="fas fa-edit"></i> <span id="modalTitle">Chỉnh sửa bài hát</span></h3>
+                            <span class="modal-close">&times;</span>
+                        </div>
+                        <div class="modal-body">
+                            <form id="editSongForm">
+                                <input type="hidden" id="editSongId">
+                                
                                 <div class="form-group">
-                                    <label for="editGenre">Thể loại *</label>
-                                    <input type="text" id="editGenre" required>
+                                    <label for="editTitle">Tên bài hát *</label>
+                                    <input type="text" id="editTitle" required>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="editDuration">Thời lượng (HH:MM:SS) *</label>
-                                    <input type="text" id="editDuration" placeholder="1:25:34" required>
+                                    <label for="editArtist">Nghệ sĩ *</label>
+                                    <input type="text" id="editArtist" required>
                                 </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="editType">Loại bài hát *</label>
-                                    <select id="editType">
-                                        <option value="free">Miễn phí</option>
-                                        <option value="premium">Premium</option>
-                                    </select>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="editGenre">Thể loại *</label>
+                                        <input type="text" id="editGenre" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="editDuration">Thời lượng (HH:MM:SS) *</label>
+                                        <input type="text" id="editDuration" placeholder="1:25:34" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="editType">Loại bài hát *</label>
+                                        <select id="editType">
+                                            <option value="free">Miễn phí</option>
+                                            <option value="premium">Premium</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="editPrice">Giá (VND)</label>
+                                        <input type="number" id="editPrice" min="0" value="199000">
+                                    </div>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="editPrice">Giá (VND)</label>
-                                    <input type="number" id="editPrice" min="0" value="199000">
+                                    <label for="editAudioFile">URL file nhạc *</label>
+                                    <input type="text" id="editAudioFile" placeholder="https://example.com/song.mp3" required>
+                                    <small class="form-text">Sử dụng URL từ dịch vụ lưu trữ (Cloudinary, Firebase, etc.)</small>
                                 </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="editAudioFile">File nhạc (MP3) *</label>
-                                <input type="text" id="editAudioFile" placeholder="assets/audio/tên-file.mp3" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="editThumbnail">Ảnh thumbnail (URL)</label>
-                                <input type="text" id="editThumbnail" placeholder="https://images.unsplash.com/photo-...">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="editBPM">BPM</label>
-                                <input type="text" id="editBPM" placeholder="128 BPM">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="editDescription">Mô tả</label>
-                                <textarea id="editDescription" rows="3"></textarea>
-                            </div>
-                            
-                            <div class="form-actions">
-                                <button type="button" class="btn-admin btn-cancel">Hủy</button>
-                                <button type="submit" class="btn-admin btn-save">
-                                    <i class="fas fa-save"></i> Lưu bài hát
-                                </button>
-                            </div>
-                        </form>
+                                
+                                <div class="form-group">
+                                    <label for="editThumbnail">Ảnh thumbnail (URL)</label>
+                                    <input type="text" id="editThumbnail" placeholder="https://images.unsplash.com/photo-...">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="editDescription">Mô tả</label>
+                                    <textarea id="editDescription" rows="3"></textarea>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="btn-admin btn-cancel">Hủy</button>
+                                    <button type="submit" class="btn-admin btn-save">
+                                        <i class="fas fa-save"></i> Lưu bài hát
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <script src="js/app.js"></script>
-    <script src="js/admin.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/music-data.js"></script>
+    <script src="./js/music-data.js"></script>
+    <script src="./js/admin.js"></script>
 </body>
 </html>

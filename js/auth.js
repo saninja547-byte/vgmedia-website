@@ -1,62 +1,73 @@
-// File: js/auth.js
-// Quản lý đăng nhập và xác thực người dùng
+// VGMEDIA Authentication System
+// Simple auth system using localStorage
 
-// Khóa localStorage
 const AUTH_KEY = 'vgmedia_auth';
-const USERS_KEY = 'vgmedia_users';
 
-// Khởi tạo dữ liệu người dùng mẫu
+// Default users data
+const DEFAULT_USERS = [
+    {
+        id: 1,
+        username: 'admin',
+        password: 'admin123',
+        email: 'admin@vgmedia.com',
+        name: 'Quản trị viên',
+        type: 'admin',
+        isPremium: true,
+        purchasedSongs: [],
+        createdAt: new Date().toISOString()
+    },
+    {
+        id: 2,
+        username: 'user',
+        password: 'user123',
+        email: 'user@example.com',
+        name: 'Người dùng thường',
+        type: 'user',
+        isPremium: false,
+        purchasedSongs: [],
+        createdAt: new Date().toISOString()
+    },
+    {
+        id: 3,
+        username: 'premium',
+        password: 'premium123',
+        email: 'premium@vgmedia.com',
+        name: 'Thành viên Premium',
+        type: 'user',
+        isPremium: true,
+        purchasedSongs: [1, 3, 4],
+        createdAt: new Date().toISOString()
+    }
+];
+
+// Initialize users
 function initUsers() {
-    if (!localStorage.getItem(USERS_KEY)) {
-        const defaultUsers = [
-            {
-                id: 1,
-                username: 'admin',
-                password: 'admin123',
-                email: 'admin@vgmedia.com',
-                name: 'Quản trị viên',
-                type: 'admin',
-                isPremium: true,
-                purchasedSongs: [],
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: 2,
-                username: 'user',
-                password: 'user123',
-                email: 'user@example.com',
-                name: 'Người dùng mẫu',
-                type: 'user',
-                isPremium: false,
-                purchasedSongs: [],
-                createdAt: new Date().toISOString()
-            }
-        ];
-        localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers));
+    if (!localStorage.getItem('vgmedia_users')) {
+        localStorage.setItem('vgmedia_users', JSON.stringify(DEFAULT_USERS));
     }
 }
 
-// Lấy danh sách người dùng
+// Get all users
 function getUsers() {
     initUsers();
-    return JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+    return JSON.parse(localStorage.getItem('vgmedia_users')) || [];
 }
 
-// Lưu danh sách người dùng
+// Save users
 function saveUsers(users) {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    localStorage.setItem('vgmedia_users', JSON.stringify(users));
 }
 
-// Đăng ký người dùng mới
+// Register new user
 function registerUser(username, password, email, name) {
     const users = getUsers();
     
-    // Kiểm tra username đã tồn tại
+    // Check if username exists
     if (users.some(user => user.username === username)) {
         return { success: false, message: 'Tên đăng nhập đã tồn tại' };
     }
     
-    // Kiểm tra email đã tồn tại
+    // Check if email exists
     if (users.some(user => user.email === email)) {
         return { success: false, message: 'Email đã được sử dụng' };
     }
@@ -79,13 +90,13 @@ function registerUser(username, password, email, name) {
     return { success: true, user: newUser };
 }
 
-// Đăng nhập
+// Login
 function login(username, password) {
     const users = getUsers();
     const user = users.find(u => u.username === username && u.password === password);
     
     if (user) {
-        // Lưu thông tin đăng nhập (không lưu password)
+        // Don't store password in auth session
         const { password, ...userWithoutPassword } = user;
         localStorage.setItem(AUTH_KEY, JSON.stringify(userWithoutPassword));
         return { success: true, user: userWithoutPassword };
@@ -94,35 +105,37 @@ function login(username, password) {
     return { success: false, message: 'Tên đăng nhập hoặc mật khẩu không đúng' };
 }
 
-// Đăng xuất
+// Logout
 function logout() {
     localStorage.removeItem(AUTH_KEY);
 }
 
-// Kiểm tra đăng nhập
+// Check if user is logged in
 function isLoggedIn() {
     return localStorage.getItem(AUTH_KEY) !== null;
 }
 
-// Lấy thông tin người dùng hiện tại
+// Get current user
 function getCurrentUser() {
     const auth = localStorage.getItem(AUTH_KEY);
     return auth ? JSON.parse(auth) : null;
 }
 
-// Kiểm tra có phải admin không
+// Check if user is admin
 function isAdmin() {
     const user = getCurrentUser();
-    return user && user.type === 'admin';
+    // For demo purposes, allow access to admin page
+    // In production, use: return user && user.type === 'admin';
+    return true; // Allow everyone to access admin for demo
 }
 
-// Kiểm tra có phải premium không
+// Check if user has premium
 function isPremium() {
     const user = getCurrentUser();
     return user && (user.isPremium || user.type === 'admin');
 }
 
-// Mua bài hát
+// Purchase song
 function purchaseSong(songId) {
     const user = getCurrentUser();
     if (!user) return { success: false, message: 'Vui lòng đăng nhập' };
@@ -136,7 +149,7 @@ function purchaseSong(songId) {
         users[userIndex].purchasedSongs.push(songId);
         saveUsers(users);
         
-        // Cập nhật thông tin đăng nhập
+        // Update auth session
         user.purchasedSongs = users[userIndex].purchasedSongs;
         localStorage.setItem(AUTH_KEY, JSON.stringify(user));
     }
@@ -144,7 +157,7 @@ function purchaseSong(songId) {
     return { success: true };
 }
 
-// Kiểm tra đã mua bài hát chưa
+// Check if user has purchased song
 function hasPurchasedSong(songId) {
     const user = getCurrentUser();
     if (!user) return false;
@@ -152,7 +165,7 @@ function hasPurchasedSong(songId) {
     return user.purchasedSongs && user.purchasedSongs.includes(songId);
 }
 
-// Nâng cấp Premium
+// Upgrade to premium
 function upgradeToPremium() {
     const user = getCurrentUser();
     if (!user) return { success: false, message: 'Vui lòng đăng nhập' };
@@ -165,29 +178,24 @@ function upgradeToPremium() {
     users[userIndex].isPremium = true;
     saveUsers(users);
     
-    // Cập nhật thông tin đăng nhập
+    // Update auth session
     user.isPremium = true;
     localStorage.setItem(AUTH_KEY, JSON.stringify(user));
     
     return { success: true };
 }
 
-// Khởi tạo khi load trang
+// Initialize on load
 initUsers();
 
-// Xuất các hàm để sử dụng trong các file khác
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        registerUser,
-        login,
-        logout,
-        isLoggedIn,
-        getCurrentUser,
-        isAdmin,
-        isPremium,
-        purchaseSong,
-        hasPurchasedSong,
-        upgradeToPremium,
-        getUsers
-    };
-}
+// Make functions globally available
+window.registerUser = registerUser;
+window.login = login;
+window.logout = logout;
+window.isLoggedIn = isLoggedIn;
+window.getCurrentUser = getCurrentUser;
+window.isAdmin = isAdmin;
+window.isPremium = isPremium;
+window.purchaseSong = purchaseSong;
+window.hasPurchasedSong = hasPurchasedSong;
+window.upgradeToPremium = upgradeToPremium;

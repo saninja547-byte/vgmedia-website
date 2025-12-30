@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VGMEDIA - Nền tảng nhạc DJ Remix hàng đầu</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>VGMEDIA - Nền tảng nhạc DJ Remix</title>
+    <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="./assets/images/favicon.ico">
+    <meta name="description" content="VGMEDIA - Nền tảng nhạc DJ Remix chất lượng cao. Nghe và tải nhạc miễn phí, premium.">
+    <meta name="keywords" content="nhạc DJ, remix, VGMEDIA, nhạc điện tử, EDM">
+    <meta property="og:title" content="VGMEDIA - Nhạc DJ Remix">
+    <meta property="og:description" content="Nghe nhạc DJ Remix chất lượng cao">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80">
+    <meta property="og:url" content="https://saninja547-byte.github.io/vgmedia-website/">
 </head>
 <body>
     <!-- Header -->
@@ -21,15 +27,15 @@
                 
                 <div class="nav-links">
                     <a href="#" class="nav-link active"><i class="fas fa-home"></i> Trang chủ</a>
-                    <a href="#library" class="nav-link"><i class="fas fa-music"></i> Thư viện nhạc</a>
+                    <a href="#library" class="nav-link"><i class="fas fa-music"></i> Thư viện</a>
                     <a href="#trending" class="nav-link"><i class="fas fa-fire"></i> Trending</a>
-                    <a href="admin.html" class="nav-link" id="adminLink" style="display:none;"><i class="fas fa-cog"></i> Admin</a>
+                    <a href="./admin.html" class="nav-link" id="adminLink"><i class="fas fa-cog"></i> Quản lý</a>
                 </div>
                 
                 <div class="nav-actions">
                     <button class="btn-subscribe" id="subscribeBtn">Nâng cấp Premium</button>
-                    <div class="user-menu" id="userMenu" style="display:none;">
-                        <span id="userName"></span>
+                    <div class="user-menu" id="userMenu">
+                        <span id="userName">Khách</span>
                         <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
                     </div>
                     <button class="btn-login" id="loginBtn">Đăng nhập</button>
@@ -62,12 +68,12 @@
                 <!-- Song Info -->
                 <div class="song-info">
                     <div class="song-thumbnail">
-                        <img id="currentThumbnail" src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80" alt="Song Thumbnail">
-                        <div class="song-badge" id="currentBadge">PREMIUM</div>
+                        <img id="currentThumbnail" src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Song Thumbnail">
+                        <div class="song-badge premium" id="currentBadge">PREMIUM</div>
                     </div>
                     
                     <div class="song-details">
-                        <h2 class="song-title" id="currentTitle">Summer Vibes 2024 - DJ Remix Extended</h2>
+                        <h2 class="song-title" id="currentTitle">Summer Vibes 2024 - DJ Remix</h2>
                         <p class="song-artist" id="currentArtist">VG Music Collective</p>
                         <div class="song-meta">
                             <span class="song-duration" id="currentDuration"><i class="fas fa-clock"></i> 1:25:34</span>
@@ -76,7 +82,7 @@
                         </div>
                         <p class="song-description" id="currentDescription">
                             Bản remix độc quyền từ VGMEDIA với âm thanh chất lượng cao.
-                            <br><span id="introNotice" style="color: #FF6584; font-weight: 600; display: none;">
+                            <br><span id="introNotice" style="color: #FF6584; font-weight: 600;">
                             <i class="fas fa-headphones"></i> Được nghe thử 2:30 phút đầu</span>
                         </p>
                         
@@ -142,12 +148,11 @@
                         <button class="filter-btn active" data-filter="all">Tất cả</button>
                         <button class="filter-btn" data-filter="free">Miễn phí</button>
                         <button class="filter-btn" data-filter="premium">Premium</button>
-                        <button class="filter-btn" data-filter="remix">DJ Remix</button>
                     </div>
                 </div>
                 
                 <div class="songs-list" id="songsList">
-                    <!-- Songs will be loaded here -->
+                    <!-- Songs loaded by JavaScript -->
                 </div>
             </div>
         </div>
@@ -167,29 +172,29 @@
                         <h4>Khám phá</h4>
                         <a href="#">Nhạc mới</a>
                         <a href="#">Top 100</a>
-                        <a href="#">Nghệ sĩ nổi bật</a>
+                        <a href="#">Nghệ sĩ</a>
                         <a href="#">Thể loại</a>
                     </div>
                     
                     <div class="footer-column">
                         <h4>Tài khoản</h4>
                         <a href="#" id="footerAccount">Đăng ký</a>
-                        <a href="#" id="footerPremium">Nâng cấp Premium</a>
-                        <a href="#">Trung tâm hỗ trợ</a>
+                        <a href="#" id="footerPremium">Premium</a>
+                        <a href="#">Hỗ trợ</a>
                     </div>
                     
                     <div class="footer-column">
                         <h4>VGMEDIA</h4>
                         <a href="#">Về chúng tôi</a>
-                        <a href="#">Điều khoản sử dụng</a>
-                        <a href="#">Chính sách bảo mật</a>
+                        <a href="#">Điều khoản</a>
+                        <a href="#">Bảo mật</a>
                         <a href="#">Liên hệ</a>
                     </div>
                 </div>
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; 2024 VGMEDIA. Tất cả các quyền được bảo lưu.</p>
+                <p>&copy; 2024 VGMEDIA. All rights reserved.</p>
                 <div class="social-links">
                     <a href="#"><i class="fab fa-facebook"></i></a>
                     <a href="#"><i class="fab fa-youtube"></i></a>
@@ -202,13 +207,12 @@
 
     <!-- Audio Element -->
     <audio id="audioPlayer" preload="metadata">
-        <!-- Audio source will be set by JavaScript -->
+        <!-- Audio source will be set dynamically -->
     </audio>
 
     <!-- JavaScript -->
-    <script src="js/app.js"></script>
-    <script src="js/admin.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/music-data.js"></script>
+    <script src="./js/music-data.js"></script>
+    <script src="./js/auth.js"></script>
+    <script src="./js/app.js"></script>
 </body>
 </html>

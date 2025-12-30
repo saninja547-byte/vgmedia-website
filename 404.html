@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Không tìm thấy trang - VGMEDIA</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .error-container {
             text-align: center;
@@ -31,6 +32,13 @@
             color: white;
         }
         
+        .error-description {
+            color: var(--gray);
+            max-width: 600px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        
         .home-btn {
             padding: 15px 30px;
             background: linear-gradient(135deg, #6C63FF, #FF6584);
@@ -39,23 +47,111 @@
             border-radius: 10px;
             font-weight: 600;
             transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .home-btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 10px 20px rgba(108, 99, 255, 0.3);
         }
+        
+        .quick-links {
+            margin-top: 40px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .quick-link {
+            padding: 12px 24px;
+            background: var(--dark-lighter);
+            color: var(--gray-light);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .quick-link:hover {
+            background: rgba(108, 99, 255, 0.1);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
     </style>
 </head>
 <body style="background: #121212;">
-    <div class="error-container">
-        <div class="error-code">404</div>
-        <div class="error-message">Trang bạn tìm kiếm không tồn tại</div>
-        <a href="index.html" class="home-btn">
-            <i class="fas fa-home"></i> Về trang chủ VGMEDIA
-        </a>
-    </div>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <span class="logo-icon">🎵</span>
+                    <h1 class="logo-text">VG<span class="logo-highlight">MEDIA</span></h1>
+                </div>
+                <a href="./index.html" class="btn-login">
+                    <i class="fas fa-home"></i> Về trang chủ
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="error-container">
+                <div class="error-code">404</div>
+                <div class="error-message">Trang bạn tìm kiếm không tồn tại</div>
+                <p class="error-description">
+                    Có vẻ như trang bạn đang tìm kiếm đã bị di chuyển, xóa hoặc không bao giờ tồn tại.
+                    Vui lòng kiểm tra lại đường dẫn hoặc quay lại trang chủ.
+                </p>
+                
+                <a href="./index.html" class="home-btn">
+                    <i class="fas fa-home"></i> Về trang chủ VGMEDIA
+                </a>
+                
+                <div class="quick-links">
+                    <a href="./index.html" class="quick-link">
+                        <i class="fas fa-music"></i> Nghe nhạc
+                    </a>
+                    <a href="./admin.html" class="quick-link">
+                        <i class="fas fa-cog"></i> Quản lý
+                    </a>
+                    <a href="./login.html" class="quick-link">
+                        <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2024 VGMEDIA. All rights reserved.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="./js/auth.js"></script>
+    <script>
+        // Simple script for 404 page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update login status
+            const user = getCurrentUser();
+            if (user) {
+                document.querySelector('.btn-login').innerHTML = `
+                    <i class="fas fa-user"></i> ${user.name}
+                `;
+            }
+        });
+    </script>
 </body>
 </html>

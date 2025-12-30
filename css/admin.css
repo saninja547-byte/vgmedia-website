@@ -1,5 +1,4 @@
 /* Admin Panel Styles */
-
 .admin-container {
     display: flex;
     min-height: 100vh;
@@ -399,6 +398,13 @@
 .form-group textarea:focus {
     outline: none;
     border-color: var(--primary);
+}
+
+.form-text {
+    display: block;
+    margin-top: 5px;
+    color: var(--gray);
+    font-size: 0.8rem;
 }
 
 .form-row {

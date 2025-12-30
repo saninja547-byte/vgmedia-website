@@ -1,6 +1,4 @@
-// File: js/admin.js
 // VGMEDIA Admin Panel
-
 document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
     const songsTableBody = document.getElementById('songsTableBody');
@@ -13,55 +11,53 @@ document.addEventListener('DOMContentLoaded', function() {
     const addSongBtn = document.getElementById('addSongBtn');
     const modalTitle = document.getElementById('modalTitle');
     const adminUsername = document.getElementById('adminUsername');
-    const adminLogout = document.getElementById('adminLogout');
-    const navLinks = document.querySelectorAll('.admin-nav-link');
-    const sections = document.querySelectorAll('.admin-section');
     
     // State variables
     let currentEditId = null;
     let isEditMode = false;
+    let currentSearch = '';
+    let currentTypeFilter = 'all';
     
-    // Kiểm tra đăng nhập admin
-    if (!isAdmin()) {
-        alert('Vui lòng đăng nhập với tài khoản admin!');
-        window.location.href = 'login.html';
-        return;
-    }
-    
-    // Cập nhật tên admin
-    const user = getCurrentUser();
-    if (user) {
-        adminUsername.textContent = user.name;
-    }
-    
-    // Khởi tạo admin panel
+    // Initialize admin panel
     function initAdmin() {
+        // Update admin username
+        const user = getCurrentUser();
+        if (user) {
+            adminUsername.textContent = user.name;
+        }
+        
         loadSongsTable();
         setupEventListeners();
+        
+        // Show welcome message
+        showNotification('Chào mừng đến với trang quản lý VGMEDIA!', 'info');
     }
     
-    // Load songs vào table
-    function loadSongsTable(filter = '', type = 'all') {
-        let songs = getMusicLibrary();
+    // Load songs into table
+    function loadSongsTable() {
+        const songs = filterSongs(currentTypeFilter, currentSearch);
         
-        // Áp dụng bộ lọc
-        if (filter) {
-            const searchLower = filter.toLowerCase();
-            songs = songs.filter(song => 
-                song.title.toLowerCase().includes(searchLower) ||
-                song.artist.toLowerCase().includes(searchLower) ||
-                song.genre.toLowerCase().includes(searchLower)
-            );
-        }
-        
-        if (type !== 'all') {
-            songs = songs.filter(song => song.type === type);
-        }
-        
-        // Xóa table cũ
+        // Clear table
         songsTableBody.innerHTML = '';
         
-        // Thêm rows mới
+        if (songs.length === 0) {
+            songsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 40px; color: var(--gray);">
+                        <i class="fas fa-music" style="font-size: 3rem; margin-bottom: 20px; display: block;"></i>
+                        <p>Không tìm thấy bài hát nào</p>
+                        <button class="btn-admin btn-add-song" style="margin-top: 20px;" id="addFirstSong">
+                            <i class="fas fa-plus"></i> Thêm bài hát đầu tiên
+                        </button>
+                    </td>
+                </tr>
+            `;
+            
+            document.getElementById('addFirstSong')?.addEventListener('click', openAddModal);
+            return;
+        }
+        
+        // Add rows
         songs.forEach(song => {
             const row = document.createElement('tr');
             const formattedPrice = song.price > 0 ? 
@@ -71,8 +67,13 @@ document.addEventListener('DOMContentLoaded', function() {
             row.innerHTML = `
                 <td>${song.id}</td>
                 <td>
-                    <div style="font-weight: 600; color: var(--light);">${song.title}</div>
-                    <div style="font-size: 0.8rem; color: var(--gray);">${song.audioFile}</div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <img src="${song.thumbnail}" alt="${song.title}" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover;">
+                        <div>
+                            <div style="font-weight: 600; color: var(--light);">${song.title}</div>
+                            <div style="font-size: 0.8rem; color: var(--gray); max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${song.audioUrl}</div>
+                        </div>
+                    </div>
                 </td>
                 <td>${song.artist}</td>
                 <td>${song.genre}</td>
@@ -96,27 +97,30 @@ document.addEventListener('DOMContentLoaded', function() {
             songsTableBody.appendChild(row);
         });
         
-        // Thêm event listeners cho các button
+        // Add event listeners to buttons
         document.querySelectorAll('.btn-edit').forEach(btn => {
             btn.addEventListener('click', () => openEditModal(parseInt(btn.dataset.id)));
         });
         
         document.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', () => deleteSong(parseInt(btn.dataset.id)));
+            btn.addEventListener('click', () => deleteSongConfirm(parseInt(btn.dataset.id)));
         });
     }
     
-    // Mở modal chỉnh sửa
+    // Open edit modal
     function openEditModal(songId) {
         const songs = getMusicLibrary();
         const song = songs.find(s => s.id === songId);
         
-        if (!song) return;
+        if (!song) {
+            showNotification('Không tìm thấy bài hát!', 'error');
+            return;
+        }
         
         currentEditId = songId;
         isEditMode = true;
         
-        // Điền form
+        // Fill form
         document.getElementById('editSongId').value = song.id;
         document.getElementById('editTitle').value = song.title;
         document.getElementById('editArtist').value = song.artist;
@@ -124,22 +128,21 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('editDuration').value = song.duration;
         document.getElementById('editType').value = song.type;
         document.getElementById('editPrice').value = song.price;
-        document.getElementById('editAudioFile').value = song.audioFile || '';
-        document.getElementById('editThumbnail').value = song.thumbnail || '';
-        document.getElementById('editBPM').value = song.bpm || '';
+        document.getElementById('editAudioFile').value = song.audioUrl;
+        document.getElementById('editThumbnail').value = song.thumbnail;
         document.getElementById('editDescription').value = song.description || '';
         
-        // Cập nhật tiêu đề modal
+        // Update modal title
         modalTitle.textContent = 'Chỉnh sửa bài hát';
         
-        // Hiển thị/ẩn field giá
+        // Toggle price field
         togglePriceField();
         
-        // Hiển thị modal
+        // Show modal
         editModal.classList.add('active');
     }
     
-    // Mở modal thêm mới
+    // Open add modal
     function openAddModal() {
         const songs = getMusicLibrary();
         const newId = songs.length > 0 ? Math.max(...songs.map(s => s.id)) + 1 : 1;
@@ -147,27 +150,34 @@ document.addEventListener('DOMContentLoaded', function() {
         // Reset form
         editSongForm.reset();
         
-        // Đặt giá trị mặc định
+        // Set default values
         document.getElementById('editSongId').value = newId;
         document.getElementById('editType').value = 'premium';
         document.getElementById('editPrice').value = 199000;
         document.getElementById('editDuration').value = '1:00:00';
+        document.getElementById('editGenre').value = 'Progressive House';
         document.getElementById('editBPM').value = '128 BPM';
+        
+        // Set default thumbnail
+        document.getElementById('editThumbnail').value = 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
+        
+        // Set default audio URL (free sample)
+        document.getElementById('editAudioFile').value = 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3';
         
         currentEditId = null;
         isEditMode = false;
         
-        // Cập nhật tiêu đề modal
+        // Update modal title
         modalTitle.textContent = 'Thêm bài hát mới';
         
-        // Hiển thị/ẩn field giá
+        // Toggle price field
         togglePriceField();
         
-        // Hiển thị modal
+        // Show modal
         editModal.classList.add('active');
     }
     
-    // Đóng modal
+    // Close edit modal
     function closeEditModal() {
         editModal.classList.remove('active');
         editSongForm.reset();
@@ -175,28 +185,19 @@ document.addEventListener('DOMContentLoaded', function() {
         isEditMode = false;
     }
     
-    // Xóa bài hát
-    function deleteSong(songId) {
-        if (confirm('Bạn có chắc chắn muốn xóa bài hát này?')) {
-            const success = deleteSongFromLibrary(songId);
-            if (success) {
-                loadSongsTable(searchInput.value, filterType.value);
-                showNotification('Đã xóa bài hát thành công!', 'success');
-            } else {
-                showNotification('Có lỗi xảy ra khi xóa bài hát!', 'error');
-            }
+    // Delete song confirmation
+    function deleteSongConfirm(songId) {
+        const song = getSongById(songId);
+        if (!song) return;
+        
+        if (confirm(`Bạn có chắc chắn muốn xóa bài hát "${song.title}"?\nHành động này không thể hoàn tác.`)) {
+            deleteSong(songId);
+            loadSongsTable();
+            showNotification(`Đã xóa bài hát "${song.title}"`, 'success');
         }
     }
     
-    // Xóa bài hát từ thư viện
-    function deleteSongFromLibrary(songId) {
-        let songs = getMusicLibrary();
-        songs = songs.filter(song => song.id !== songId);
-        updateMusicLibrary(songs);
-        return true;
-    }
-    
-    // Hiển thị/ẩn field giá
+    // Toggle price field
     function togglePriceField() {
         const type = document.getElementById('editType').value;
         const priceField = document.getElementById('editPrice');
@@ -206,88 +207,72 @@ document.addEventListener('DOMContentLoaded', function() {
             priceField.value = 0;
         } else {
             priceField.disabled = false;
-            if (!priceField.value) {
+            if (!priceField.value || priceField.value === '0') {
                 priceField.value = 199000;
             }
         }
     }
     
-    // Hiển thị thông báo
+    // Show notification
     function showNotification(message, type = 'info') {
-        // Tạo notification element
+        // Remove existing notifications
+        document.querySelectorAll('.admin-notification').forEach(el => el.remove());
+        
+        // Create notification
         const notification = document.createElement('div');
-        notification.className = 'notification';
-        notification.style.position = 'fixed';
-        notification.style.top = '20px';
-        notification.style.right = '20px';
+        notification.className = `admin-notification notification ${type}`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--secondary)' : 'var(--primary)'};
+            color: white;
+            padding: 15px 25px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        `;
         
         let icon = 'fas fa-info-circle';
-        let bgColor = 'var(--primary)';
-        
-        if (type === 'success') {
-            icon = 'fas fa-check-circle';
-            bgColor = 'var(--success)';
-        }
-        if (type === 'error') {
-            icon = 'fas fa-exclamation-circle';
-            bgColor = 'var(--secondary)';
-        }
+        if (type === 'success') icon = 'fas fa-check-circle';
+        if (type === 'error') icon = 'fas fa-exclamation-circle';
         
         notification.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px; padding: 15px 25px; background: ${bgColor}; color: white; border-radius: var(--radius-md);">
-                <i class="${icon}" style="font-size: 1.2rem;"></i>
-                <span>${message}</span>
-            </div>
+            <i class="${icon}" style="font-size: 1.2rem;"></i>
+            <span>${message}</span>
         `;
         
         document.body.appendChild(notification);
         
+        // Auto remove after 3 seconds
         setTimeout(() => {
-            notification.remove();
+            notification.style.animation = 'slideIn 0.3s ease reverse';
+            setTimeout(() => notification.remove(), 300);
         }, 3000);
-    }
-    
-    // Chuyển đổi giữa các section
-    function switchSection(sectionId) {
-        // Ẩn tất cả sections
-        sections.forEach(section => {
-            section.classList.remove('active');
-        });
-        
-        // Xóa active từ tất cả nav links
-        navLinks.forEach(link => {
-            link.classList.remove('active');
-        });
-        
-        // Hiển thị section được chọn
-        const activeSection = document.getElementById(sectionId);
-        if (activeSection) {
-            activeSection.classList.add('active');
-        }
-        
-        // Active nav link tương ứng
-        const activeNavLink = document.querySelector(`.admin-nav-link[data-section="${sectionId.replace('Section', '')}"]`);
-        if (activeNavLink) {
-            activeNavLink.classList.add('active');
-        }
     }
     
     // Setup event listeners
     function setupEventListeners() {
-        // Search
+        // Search input
         searchInput.addEventListener('input', () => {
-            loadSongsTable(searchInput.value, filterType.value);
+            currentSearch = searchInput.value;
+            loadSongsTable();
         });
         
-        // Filter
+        // Filter select
         filterType.addEventListener('change', () => {
-            loadSongsTable(searchInput.value, filterType.value);
+            currentTypeFilter = filterType.value;
+            loadSongsTable();
         });
         
-        // Type change
+        // Type change in form
         document.getElementById('editType').addEventListener('change', togglePriceField);
         
-        // Modal close
+        // Modal close buttons
         modalClose.addEventListener('click', closeEditModal);
         btnCancel.addEventListener('click', closeEditModal);
         
@@ -306,76 +291,79 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             
             const songData = {
-                title: document.getElementById('editTitle').value,
-                artist: document.getElementById('editArtist').value,
-                genre: document.getElementById('editGenre').value,
-                duration: document.getElementById('editDuration').value,
+                title: document.getElementById('editTitle').value.trim(),
+                artist: document.getElementById('editArtist').value.trim(),
+                genre: document.getElementById('editGenre').value.trim(),
+                duration: document.getElementById('editDuration').value.trim(),
                 type: document.getElementById('editType').value,
                 price: parseInt(document.getElementById('editPrice').value) || 0,
-                audioFile: document.getElementById('editAudioFile').value,
-                thumbnail: document.getElementById('editThumbnail').value,
-                bpm: document.getElementById('editBPM').value || '128 BPM',
-                description: document.getElementById('editDescription').value,
-                introEnd: document.getElementById('editType').value === 'premium' ? 150 : 0
+                audioUrl: document.getElementById('editAudioFile').value.trim(),
+                thumbnail: document.getElementById('editThumbnail').value.trim() || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                description: document.getElementById('editDescription').value.trim(),
+                bpm: "128 BPM"
             };
+            
+            // Validation
+            if (!songData.title || !songData.artist || !songData.audioUrl) {
+                showNotification('Vui lòng điền đầy đủ thông tin bắt buộc!', 'error');
+                return;
+            }
             
             let success = false;
             let message = '';
             
             if (isEditMode && currentEditId) {
-                // Cập nhật bài hát
+                // Update existing song
                 success = updateSong(currentEditId, songData);
                 message = success ? 'Cập nhật bài hát thành công!' : 'Có lỗi xảy ra khi cập nhật!';
             } else {
-                // Thêm bài hát mới
-                const newId = addNewSong(songData);
+                // Add new song
+                const newId = addSong(songData);
                 success = newId > 0;
                 message = success ? 'Thêm bài hát mới thành công!' : 'Có lỗi xảy ra khi thêm mới!';
             }
             
             if (success) {
-                loadSongsTable(searchInput.value, filterType.value);
+                loadSongsTable();
                 closeEditModal();
                 showNotification(message, 'success');
+                
+                // Dispatch event for main page to update
+                window.dispatchEvent(new CustomEvent('musicLibraryUpdated'));
             } else {
                 showNotification(message, 'error');
             }
         });
         
-        // Logout button
-        adminLogout.addEventListener('click', () => {
-            if (confirm('Bạn có muốn đăng xuất không?')) {
-                logout();
-                window.location.href = 'index.html';
-            }
-        });
-        
-        // Navigation links
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const section = link.dataset.section;
-                if (section) {
-                    switchSection(section + 'Section');
-                } else if (link.getAttribute('href') === 'index.html') {
-                    window.location.href = 'index.html';
-                }
-            });
-        });
-        
         // Listen for music library updates
         window.addEventListener('musicLibraryUpdated', () => {
-            loadSongsTable(searchInput.value, filterType.value);
+            loadSongsTable();
         });
         
-        // Listen for storage changes
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'vgmedia_music_library') {
-                loadSongsTable(searchInput.value, filterType.value);
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + N: Add new song
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                e.preventDefault();
+                openAddModal();
+            }
+            
+            // Escape: Close modal
+            if (e.key === 'Escape') {
+                closeEditModal();
+            }
+            
+            // Ctrl/Cmd + F: Focus search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                searchInput.focus();
             }
         });
+        
+        // Focus search box on page load
+        searchInput.focus();
     }
     
-    // Khởi tạo admin panel
+    // Initialize admin panel
     initAdmin();
 });

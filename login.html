@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - VGMEDIA</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Login page styles */
@@ -248,6 +248,28 @@
         .tab-content.active {
             display: block;
         }
+        
+        .demo-accounts {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(108, 99, 255, 0.1);
+            border-radius: 10px;
+            font-size: 0.85rem;
+        }
+        
+        .demo-accounts h4 {
+            margin-top: 0;
+            color: #6C63FF;
+        }
+        
+        .demo-accounts ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .demo-accounts li {
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -272,7 +294,7 @@
                         <label for="userUsername">Tên đăng nhập</label>
                         <div class="input-with-icon">
                             <i class="fas fa-user"></i>
-                            <input type="text" id="userUsername" placeholder="Nhập tên đăng nhập" required>
+                            <input type="text" id="userUsername" placeholder="Nhập tên đăng nhập" value="user">
                         </div>
                     </div>
                     
@@ -280,13 +302,13 @@
                         <label for="userPassword">Mật khẩu</label>
                         <div class="input-with-icon">
                             <i class="fas fa-lock"></i>
-                            <input type="password" id="userPassword" placeholder="Nhập mật khẩu" required>
+                            <input type="password" id="userPassword" placeholder="Nhập mật khẩu" value="user123">
                         </div>
                     </div>
                     
                     <div class="form-options">
                         <label class="checkbox">
-                            <input type="checkbox" id="rememberMe">
+                            <input type="checkbox" id="rememberMe" checked>
                             <span>Ghi nhớ đăng nhập</span>
                         </label>
                         <a href="#" class="forgot-link">Quên mật khẩu?</a>
@@ -299,9 +321,18 @@
                     </button>
                 </form>
                 
+                <div class="demo-accounts">
+                    <h4><i class="fas fa-key"></i> Tài khoản demo:</h4>
+                    <ul>
+                        <li><strong>User:</strong> user / user123</li>
+                        <li><strong>Premium:</strong> premium / premium123</li>
+                        <li><strong>Admin:</strong> admin / admin123</li>
+                    </ul>
+                </div>
+                
                 <div class="login-footer">
                     <p>Chưa có tài khoản? <a href="#" id="showRegister">Đăng ký ngay</a></p>
-                    <p style="margin-top: 10px;"><a href="index.html"><i class="fas fa-home"></i> Quay lại trang chủ</a></p>
+                    <p style="margin-top: 10px;"><a href="./index.html"><i class="fas fa-home"></i> Quay lại trang chủ</a></p>
                 </div>
             </div>
             
@@ -314,7 +345,7 @@
                         <label for="adminUsername">Tên đăng nhập admin</label>
                         <div class="input-with-icon">
                             <i class="fas fa-user-shield"></i>
-                            <input type="text" id="adminUsername" placeholder="admin" required>
+                            <input type="text" id="adminUsername" placeholder="admin" value="admin">
                         </div>
                     </div>
                     
@@ -322,7 +353,7 @@
                         <label for="adminPassword">Mật khẩu admin</label>
                         <div class="input-with-icon">
                             <i class="fas fa-key"></i>
-                            <input type="password" id="adminPassword" placeholder="admin123" required>
+                            <input type="password" id="adminPassword" placeholder="admin123" value="admin123">
                         </div>
                     </div>
                     
@@ -383,182 +414,68 @@
         </div>
     </div>
     
-    <!-- Simple auth system included directly in the page -->
+    <script src="./js/auth.js"></script>
     <script>
-        // Simple authentication system
-        class AuthSystem {
-            constructor() {
-                this.AUTH_KEY = 'vgmedia_auth';
-                this.USERS_KEY = 'vgmedia_users';
-                this.initDefaultUsers();
-            }
-            
-            initDefaultUsers() {
-                if (!localStorage.getItem(this.USERS_KEY)) {
-                    const defaultUsers = [
-                        {
-                            id: 1,
-                            username: 'admin',
-                            password: 'admin123',
-                            email: 'admin@vgmedia.com',
-                            name: 'Quản trị viên',
-                            type: 'admin',
-                            isPremium: true,
-                            purchasedSongs: [],
-                            createdAt: new Date().toISOString()
-                        },
-                        {
-                            id: 2,
-                            username: 'user',
-                            password: 'user123',
-                            email: 'user@example.com',
-                            name: 'Người dùng mẫu',
-                            type: 'user',
-                            isPremium: false,
-                            purchasedSongs: [],
-                            createdAt: new Date().toISOString()
-                        },
-                        {
-                            id: 3,
-                            username: 'demo',
-                            password: 'demo123',
-                            email: 'demo@vgmedia.com',
-                            name: 'Người dùng Demo',
-                            type: 'user',
-                            isPremium: false,
-                            purchasedSongs: [],
-                            createdAt: new Date().toISOString()
-                        }
-                    ];
-                    localStorage.setItem(this.USERS_KEY, JSON.stringify(defaultUsers));
-                }
-            }
-            
-            getUsers() {
-                const users = localStorage.getItem(this.USERS_KEY);
-                return users ? JSON.parse(users) : [];
-            }
-            
-            saveUsers(users) {
-                localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
-            }
-            
-            login(username, password) {
-                const users = this.getUsers();
-                const user = users.find(u => u.username === username && u.password === password);
-                
-                if (user) {
-                    // Don't store password in auth session
-                    const { password, ...userWithoutPassword } = user;
-                    localStorage.setItem(this.AUTH_KEY, JSON.stringify(userWithoutPassword));
-                    return { success: true, user: userWithoutPassword };
-                }
-                
-                return { success: false, message: 'Tên đăng nhập hoặc mật khẩu không đúng' };
-            }
-            
-            register(username, password, email, name) {
-                const users = this.getUsers();
-                
-                if (users.some(user => user.username === username)) {
-                    return { success: false, message: 'Tên đăng nhập đã tồn tại' };
-                }
-                
-                if (users.some(user => user.email === email)) {
-                    return { success: false, message: 'Email đã được sử dụng' };
-                }
-                
-                const newUser = {
-                    id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
-                    username,
-                    password,
-                    email,
-                    name,
-                    type: 'user',
-                    isPremium: false,
-                    purchasedSongs: [],
-                    createdAt: new Date().toISOString()
-                };
-                
-                users.push(newUser);
-                this.saveUsers(users);
-                
-                return { success: true, user: newUser };
-            }
-            
-            isLoggedIn() {
-                return localStorage.getItem(this.AUTH_KEY) !== null;
-            }
-            
-            getCurrentUser() {
-                const auth = localStorage.getItem(this.AUTH_KEY);
-                return auth ? JSON.parse(auth) : null;
-            }
-            
-            isAdmin() {
-                const user = this.getCurrentUser();
-                return user && user.type === 'admin';
-            }
-        }
-        
-        // Create auth instance
-        const auth = new AuthSystem();
-        
-        // Page functionality
+        // Login page JavaScript
         document.addEventListener('DOMContentLoaded', function() {
-            // Tab switching
-            const tabBtns = document.querySelectorAll('.tab-btn');
-            const tabContents = document.querySelectorAll('.tab-content');
+            // DOM Elements
+            const userLoginForm = document.getElementById('userForm');
+            const adminLoginForm = document.getElementById('adminForm');
+            const registerForm = document.getElementById('registerForm');
+            const toggleAdminBtn = document.querySelector('.tab-btn[data-tab="admin"]');
+            const toggleUserBtn = document.querySelector('.tab-btn[data-tab="user"]');
+            const adminLoginSection = document.getElementById('adminTab');
+            const userLoginSection = document.getElementById('userTab');
+            const registerSection = document.getElementById('registerTab');
+            const registerLink = document.getElementById('showRegister');
+            const cancelRegister = document.getElementById('cancelRegister');
+            const backToUser = document.querySelector('.back-to-user');
             
-            tabBtns.forEach(btn => {
+            // Tab switching
+            document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const tabId = btn.dataset.tab;
                     
                     // Update active tab button
-                    tabBtns.forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     
                     // Show corresponding content
-                    tabContents.forEach(content => content.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
                     document.getElementById(`${tabId}Tab`).classList.add('active');
                 });
             });
             
             // Show register form
-            document.getElementById('showRegister').addEventListener('click', function(e) {
+            registerLink.addEventListener('click', function(e) {
                 e.preventDefault();
                 
                 // Hide all tabs
-                tabContents.forEach(content => content.classList.remove('active'));
-                tabBtns.forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
                 
                 // Show register tab
-                document.getElementById('registerTab').classList.add('active');
+                registerSection.classList.add('active');
             });
             
             // Cancel registration
-            document.getElementById('cancelRegister').addEventListener('click', function() {
-                // Reset to user login
-                tabContents.forEach(content => content.classList.remove('active'));
-                tabBtns.forEach(btn => btn.classList.remove('active'));
-                
-                document.getElementById('userTab').classList.add('active');
-                document.querySelector('.tab-btn[data-tab="user"]').classList.add('active');
+            cancelRegister.addEventListener('click', function() {
+                registerSection.classList.remove('active');
+                userLoginSection.classList.add('active');
+                toggleUserBtn.classList.add('active');
             });
             
             // Back to user login from admin
-            document.querySelector('.back-to-user').addEventListener('click', function(e) {
+            backToUser.addEventListener('click', function(e) {
                 e.preventDefault();
-                
-                tabContents.forEach(content => content.classList.remove('active'));
-                tabBtns.forEach(btn => btn.classList.remove('active'));
-                
-                document.getElementById('userTab').classList.add('active');
-                document.querySelector('.tab-btn[data-tab="user"]').classList.add('active');
+                adminLoginSection.classList.remove('active');
+                userLoginSection.classList.add('active');
+                toggleUserBtn.classList.add('active');
+                toggleAdminBtn.classList.remove('active');
             });
             
-            // User login form
-            document.getElementById('userForm').addEventListener('submit', function(e) {
+            // User Login Form Submission
+            userLoginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
                 const username = document.getElementById('userUsername').value.trim();
@@ -574,8 +491,7 @@
                 
                 // Validate
                 if (!username || !password) {
-                    messageEl.textContent = 'Vui lòng điền đầy đủ thông tin';
-                    messageEl.classList.add('error');
+                    showError('userMessage', 'Vui lòng điền đầy đủ thông tin');
                     return;
                 }
                 
@@ -586,11 +502,11 @@
                 
                 // Perform login
                 setTimeout(() => {
-                    const result = auth.login(username, password);
+                    // Call login function from auth.js
+                    const result = login(username, password);
                     
                     if (result.success) {
-                        messageEl.textContent = 'Đăng nhập thành công! Đang chuyển hướng...';
-                        messageEl.classList.add('success');
+                        showSuccess('userMessage', 'Đăng nhập thành công! Đang chuyển hướng...');
                         
                         // Store remember me
                         const rememberMe = document.getElementById('rememberMe').checked;
@@ -607,8 +523,7 @@
                             }
                         }, 1000);
                     } else {
-                        messageEl.textContent = result.message;
-                        messageEl.classList.add('error');
+                        showError('userMessage', result.message || 'Đăng nhập thất bại');
                         btnText.textContent = 'Đăng nhập';
                         loading.classList.remove('active');
                         submitBtn.disabled = false;
@@ -616,8 +531,8 @@
                 }, 1000);
             });
             
-            // Admin login form
-            document.getElementById('adminForm').addEventListener('submit', function(e) {
+            // Admin Login Form Submission
+            adminLoginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
                 const username = document.getElementById('adminUsername').value.trim();
@@ -633,8 +548,7 @@
                 
                 // Validate
                 if (!username || !password) {
-                    messageEl.textContent = 'Vui lòng điền đầy đủ thông tin';
-                    messageEl.classList.add('error');
+                    showError('adminMessage', 'Vui lòng điền đầy đủ thông tin');
                     return;
                 }
                 
@@ -645,18 +559,17 @@
                 
                 // Perform login
                 setTimeout(() => {
-                    const result = auth.login(username, password);
+                    // Call login function from auth.js
+                    const result = login(username, password);
                     
                     if (result.success && result.user.type === 'admin') {
-                        messageEl.textContent = 'Đăng nhập Admin thành công! Đang chuyển hướng...';
-                        messageEl.classList.add('success');
+                        showSuccess('adminMessage', 'Đăng nhập Admin thành công! Đang chuyển hướng...');
                         
                         setTimeout(() => {
                             window.location.href = 'admin.html';
                         }, 1000);
                     } else {
-                        messageEl.textContent = 'Thông tin đăng nhập admin không chính xác';
-                        messageEl.classList.add('error');
+                        showError('adminMessage', 'Thông tin đăng nhập admin không chính xác');
                         btnText.textContent = 'Đăng nhập Admin';
                         loading.classList.remove('active');
                         submitBtn.disabled = false;
@@ -664,112 +577,22 @@
                 }, 1000);
             });
             
-            // Register form
-            document.getElementById('registerForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const name = document.getElementById('regName').value.trim();
-                const username = document.getElementById('regUsername').value.trim();
-                const email = document.getElementById('regEmail').value.trim();
-                const password = document.getElementById('regPassword').value;
-                const confirmPassword = document.getElementById('regConfirmPassword').value;
-                const messageEl = document.getElementById('registerMessage');
-                const submitBtn = document.getElementById('registerSubmitBtn');
-                const loading = document.getElementById('registerLoading');
-                const btnText = submitBtn.querySelector('span');
-                
-                // Reset message
-                messageEl.className = 'message';
-                messageEl.textContent = '';
-                
-                // Validate
-                let isValid = true;
-                let errorMessage = '';
-                
-                if (!name) {
-                    errorMessage = 'Vui lòng nhập họ và tên';
-                    isValid = false;
-                } else if (!username) {
-                    errorMessage = 'Vui lòng nhập tên đăng nhập';
-                    isValid = false;
-                } else if (!email) {
-                    errorMessage = 'Vui lòng nhập email';
-                    isValid = false;
-                } else if (!isValidEmail(email)) {
-                    errorMessage = 'Email không hợp lệ';
-                    isValid = false;
-                } else if (!password) {
-                    errorMessage = 'Vui lòng nhập mật khẩu';
-                    isValid = false;
-                } else if (password.length < 6) {
-                    errorMessage = 'Mật khẩu phải có ít nhất 6 ký tự';
-                    isValid = false;
-                } else if (!confirmPassword) {
-                    errorMessage = 'Vui lòng xác nhận mật khẩu';
-                    isValid = false;
-                } else if (password !== confirmPassword) {
-                    errorMessage = 'Mật khẩu xác nhận không khớp';
-                    isValid = false;
-                }
-                
-                if (!isValid) {
-                    messageEl.textContent = errorMessage;
-                    messageEl.classList.add('error');
-                    return;
-                }
-                
-                // Show loading
-                btnText.textContent = 'Đang đăng ký...';
-                loading.classList.add('active');
-                submitBtn.disabled = true;
-                
-                // Perform registration
-                setTimeout(() => {
-                    const result = auth.register(username, password, email, name);
-                    
-                    if (result.success) {
-                        messageEl.textContent = 'Đăng ký thành công! Vui lòng đăng nhập.';
-                        messageEl.classList.add('success');
-                        
-                        // Reset form
-                        document.getElementById('registerForm').reset();
-                        
-                        // Auto switch to login after 2 seconds
-                        setTimeout(() => {
-                            document.getElementById('cancelRegister').click();
-                            document.getElementById('userUsername').value = username;
-                            document.getElementById('userPassword').focus();
-                        }, 2000);
-                    } else {
-                        messageEl.textContent = result.message;
-                        messageEl.classList.add('error');
-                    }
-                    
-                    btnText.textContent = 'Đăng ký';
-                    loading.classList.remove('active');
-                    submitBtn.disabled = false;
-                }, 1000);
-            });
+            // Helper Functions
+            function showError(elementId, message) {
+                const element = document.getElementById(elementId);
+                element.textContent = message;
+                element.classList.add('error');
+            }
             
-            // Check for remembered user
-            const rememberedUser = localStorage.getItem('vgmedia_remember_user');
-            if (rememberedUser) {
-                document.getElementById('userUsername').value = rememberedUser;
-                document.getElementById('rememberMe').checked = true;
+            function showSuccess(elementId, message) {
+                const element = document.getElementById(elementId);
+                element.textContent = message;
+                element.classList.add('success');
             }
             
             // Auto-focus on username field
             document.getElementById('userUsername').focus();
-            
-            // Helper function
-            function isValidEmail(email) {
-                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                return re.test(email);
-            }
         });
-    <script src="js/app.js"></script>
-    <script src="js/admin.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/music-data.js"></script>
+    </script>
 </body>
 </html>

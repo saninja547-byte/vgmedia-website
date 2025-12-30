@@ -1,6 +1,4 @@
-// File: js/app.js
-// VGMEDIA Music Player Application
-
+// VGMEDIA Main Application
 document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
     const audioPlayer = document.getElementById('audioPlayer');
@@ -27,6 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const likeBtn = document.getElementById('likeBtn');
     const downloadBtn = document.getElementById('downloadBtn');
     const buyBtn = document.getElementById('buyBtn');
+    const filterBtns = document.querySelectorAll('.filter-btn');
     
     // State variables
     let currentSongId = 1;
@@ -35,9 +34,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let introTimer = null;
     let currentFilter = 'all';
     
-    // Khởi tạo player
+    // Initialize player
     function initPlayer() {
-        // Kiểm tra đăng nhập
+        // Update login UI
         updateLoginUI();
         
         // Setup canvas for waveform
@@ -63,16 +62,9 @@ document.addEventListener('DOMContentLoaded', function() {
             loadSong(currentSongId);
             renderMusicLibrary();
         });
-        
-        // Listen for auth changes
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'vgmedia_auth') {
-                updateLoginUI();
-            }
-        });
     }
     
-    // Cập nhật UI đăng nhập
+    // Update login UI
     function updateLoginUI() {
         const user = getCurrentUser();
         
@@ -83,8 +75,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (isAdmin()) {
                 adminLink.style.display = 'flex';
-            } else {
-                adminLink.style.display = 'none';
             }
             
             if (isPremium()) {
@@ -102,17 +92,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Load bài hát theo ID
+    // Load song by ID
     function loadSong(songId) {
         const song = getSongById(songId);
         if (!song) return;
         
         currentSongId = songId;
         
-        // Cập nhật audio player với file thật
-        audioPlayer.src = song.audioFile;
+        // Update audio player with real URL
+        audioPlayer.src = song.audioUrl;
         
-        // Update UI với thông tin bài hát
+        // Update UI with song info
         document.getElementById('currentTitle').textContent = song.title;
         document.getElementById('currentArtist').textContent = song.artist;
         document.getElementById('currentDuration').innerHTML = `<i class="fas fa-clock"></i> ${song.duration}`;
@@ -124,12 +114,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update badge
         const badge = document.getElementById('currentBadge');
         badge.textContent = song.type === 'premium' ? 'PREMIUM' : 'FREE';
-        badge.className = 'song-badge ' + song.type;
+        badge.className = `song-badge ${song.type}`;
         
         // Update total time
         totalTimeEl.textContent = song.duration;
         
-        // Update buy button với giá
+        // Update buy button with price
         const formattedPrice = song.price > 0 ? 
             song.price.toLocaleString('vi-VN') + 'đ' : 
             'Miễn phí';
@@ -142,6 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('introNotice').style.display = 'inline';
             buyBtn.innerHTML = `<i class="fas fa-shopping-cart"></i> Mua bài hát - ${formattedPrice}`;
             buyBtn.disabled = false;
+            buyBtn.style.background = '';
         } else if (song.type === 'premium' && (hasPurchased || isUserPremium)) {
             document.getElementById('introNotice').style.display = 'none';
             buyBtn.innerHTML = `<i class="fas fa-check"></i> Đã mua`;
@@ -166,23 +157,12 @@ document.addEventListener('DOMContentLoaded', function() {
         updateActiveSong();
     }
     
-    // Render thư viện nhạc
+    // Render music library
     function renderMusicLibrary() {
-        const songs = getMusicLibrary();
+        const songs = filterSongs(currentFilter);
         songsList.innerHTML = '';
         
-        let filteredSongs = songs;
-        if (currentFilter !== 'all') {
-            filteredSongs = songs.filter(song => {
-                if (currentFilter === 'remix') {
-                    return song.genre.toLowerCase().includes('remix') || 
-                           song.title.toLowerCase().includes('remix');
-                }
-                return song.type === currentFilter;
-            });
-        }
-        
-        filteredSongs.forEach(song => {
+        songs.forEach(song => {
             const songItem = document.createElement('div');
             songItem.className = `song-item ${song.id === currentSongId ? 'active' : ''}`;
             songItem.dataset.id = song.id;
@@ -286,19 +266,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Play bài hát hiện tại
+    // Play current song
     function playSong() {
         const song = getSongById(currentSongId);
         if (!song) return;
         
-        // Kiểm tra quyền phát nhạc
+        // Check playback rights
         if (song.type === 'premium' && !isPremium() && !hasPurchasedSong(currentSongId)) {
-            // Đặt thời gian intro
-            audioPlayer.currentTime = 0;
+            // Set intro timer
             introTimer = setTimeout(() => {
                 pauseSong();
                 showPurchaseModal(song);
-            }, 150000); // 2:30 phút
+            }, 150000); // 2:30 minutes
             
             showIntroNotification();
         }
@@ -317,11 +296,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Play audio
         audioPlayer.play().catch(e => {
             console.error('Lỗi phát nhạc:', e);
-            showNotification('Không thể phát nhạc. Vui lòng kiểm tra file audio.');
+            showNotification('Không thể phát nhạc. Vui lòng kiểm tra kết nối internet.', 'error');
         });
     }
     
-    // Pause bài hát hiện tại
+    // Pause current song
     function pauseSong() {
         isPlaying = false;
         document.body.classList.remove('playing');
@@ -356,7 +335,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         currentTimeEl.textContent = formatTime(currentTime);
         
-        // Kiểm tra intro cho bài premium
+        // Check intro for premium songs
         const song = getSongById(currentSongId);
         if (song && song.type === 'premium' && song.introEnd > 0 && 
             !isPremium() && !hasPurchasedSong(currentSongId)) {
@@ -367,9 +346,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Hiển thị thông báo intro
+    // Show intro notification
     function showIntroNotification() {
-        // Tạo notification
+        // Create notification
         const notification = document.createElement('div');
         notification.className = 'notification';
         notification.id = 'introNotification';
@@ -389,14 +368,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.appendChild(notification);
         notification.style.display = 'block';
         
-        // Ẩn sau 5 giây
+        // Hide after 5 seconds
         setTimeout(() => {
             notification.style.animation = 'slideIn 0.3s ease reverse';
             setTimeout(() => notification.remove(), 300);
         }, 5000);
     }
     
-    // Hiển thị modal mua bài hát
+    // Show purchase modal
     function showPurchaseModal(song) {
         const modal = document.createElement('div');
         modal.id = 'purchaseModal';
@@ -464,7 +443,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         document.body.appendChild(modal);
         
-        // Thêm event listeners
+        // Add event listeners
         document.getElementById('cancelPurchase').addEventListener('click', () => {
             modal.remove();
         });
@@ -472,16 +451,16 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('confirmPurchase').addEventListener('click', () => {
             const result = purchaseSong(song.id);
             if (result.success) {
-                showNotification(`Mua thành công bài hát "${song.title}"!`);
+                showNotification(`Mua thành công bài hát "${song.title}"!`, 'success');
                 loadSong(song.id);
                 modal.remove();
             } else {
-                showNotification(result.message || 'Có lỗi xảy ra!');
+                showNotification(result.message || 'Có lỗi xảy ra!', 'error');
             }
         });
     }
     
-    // Hiển thị thông báo
+    // Show notification
     function showNotification(message, type = 'info') {
         const notification = document.createElement('div');
         notification.className = 'notification';
@@ -593,9 +572,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Filter buttons
-        document.querySelectorAll('.filter-btn').forEach(btn => {
+        filterBtns.forEach(btn => {
             btn.addEventListener('click', function() {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                filterBtns.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 currentFilter = this.dataset.filter;
                 renderMusicLibrary();
@@ -631,7 +610,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             showNotification(`Đang tải xuống: ${song.title}...`);
-            // Trong thực tế, bạn sẽ thực hiện download file ở đây
+            // In production, implement actual download
+            window.open(song.audioUrl, '_blank');
         });
         
         // Buy button
@@ -641,7 +621,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (song.type === 'free') {
                 showNotification('Đang tải xuống bài hát miễn phí...');
-                // Tải xuống file free
+                window.open(song.audioUrl, '_blank');
             } else {
                 showPurchaseModal(song);
             }
@@ -706,6 +686,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Khởi tạo player
+    // Initialize player
     initPlayer();
 });
