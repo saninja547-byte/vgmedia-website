@@ -414,10 +414,12 @@
         </div>
     </div>
     
-    <script src="./js/auth.js"></script>
+    <script src="./js/auth-fixed.js"></script>
     <script>
-        // Login page JavaScript
+        // Login page JavaScript - FIXED VERSION
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Login page loaded');
+            
             // DOM Elements
             const userLoginForm = document.getElementById('userForm');
             const adminLoginForm = document.getElementById('adminForm');
@@ -474,30 +476,77 @@
                 toggleAdminBtn.classList.remove('active');
             });
             
-            // User Login Form Submission
-            if (result.success) {
-    showSuccess('userMessage', 'Đăng nhập thành công! Đang chuyển hướng...');
-    
-    // QUAN TRỌNG: Thêm timeout và force redirect
-    setTimeout(() => {
-        // Lưu thông tin đăng nhập vào sessionStorage (nhanh hơn)
-        sessionStorage.setItem('vgmedia_login_time', Date.now());
-        sessionStorage.setItem('vgmedia_username', username);
-        
-        // Force redirect với cache busting
-        const timestamp = Date.now();
-        
-        if (result.user.type === 'admin') {
-            // Admin chuyển đến admin.html
-            window.location.href = './admin.html?login=' + timestamp;
-        } else {
-            // User chuyển đến index.html với library section
-            window.location.href = './index.html?login=' + timestamp + '&user=' + username + '#library';
-        }
-    }, 1500);
-}
+            // ============================================
+            // USER LOGIN FORM SUBMISSION - FIXED VERSION
+            // ============================================
+            userLoginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('userUsername').value.trim();
+                const password = document.getElementById('userPassword').value;
+                const messageEl = document.getElementById('userMessage');
+                const submitBtn = document.getElementById('userSubmitBtn');
+                const loading = document.getElementById('userLoading');
+                const btnText = submitBtn.querySelector('span');
+                
+                // Reset message
+                messageEl.className = 'message';
+                messageEl.textContent = '';
+                
+                // Validate
+                if (!username || !password) {
+                    showError('userMessage', 'Vui lòng điền đầy đủ thông tin');
+                    return;
+                }
+                
+                // Show loading
+                btnText.textContent = 'Đang đăng nhập...';
+                loading.classList.add('active');
+                submitBtn.disabled = true;
+                
+                // Perform login
+                setTimeout(() => {
+                    // Call login function from auth-fixed.js
+                    const result = window.login ? window.login(username, password) : login(username, password);
+                    
+                    if (result.success) {
+                        showSuccess('userMessage', '✅ Đăng nhập thành công! Đang chuyển hướng...');
+                        
+                        // Store remember me
+                        const rememberMe = document.getElementById('rememberMe').checked;
+                        if (rememberMe) {
+                            localStorage.setItem('vgmedia_remember_user', username);
+                        }
+                        
+                        // QUAN TRỌNG: Force redirect với cache busting
+                        setTimeout(() => {
+                            // Lưu session data
+                            sessionStorage.setItem('vgmedia_login_time', Date.now());
+                            sessionStorage.setItem('vgmedia_username', username);
+                            
+                            // Force redirect với timestamp để tránh cache
+                            const timestamp = Date.now();
+                            
+                            if (result.user.type === 'admin') {
+                                // Admin chuyển đến admin.html
+                                window.location.href = './admin.html?login=' + timestamp + '&auth=' + timestamp;
+                            } else {
+                                // User chuyển đến index.html với library section
+                                window.location.href = './index.html?login=' + timestamp + '&user=' + username + '&t=' + timestamp + '#library';
+                            }
+                        }, 1500);
+                    } else {
+                        showError('userMessage', result.message || 'Đăng nhập thất bại');
+                        btnText.textContent = 'Đăng nhập';
+                        loading.classList.remove('active');
+                        submitBtn.disabled = false;
+                    }
+                }, 1000);
+            });
             
-            // Admin Login Form Submission
+            // ============================================
+            // ADMIN LOGIN FORM SUBMISSION - FIXED VERSION
+            // ============================================
             adminLoginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
@@ -525,15 +574,21 @@
                 
                 // Perform login
                 setTimeout(() => {
-                    // Call login function from auth.js
-                    const result = login(username, password);
+                    // Call login function from auth-fixed.js
+                    const result = window.login ? window.login(username, password) : login(username, password);
                     
                     if (result.success && result.user.type === 'admin') {
-                        showSuccess('adminMessage', 'Đăng nhập Admin thành công! Đang chuyển hướng...');
+                        showSuccess('adminMessage', '✅ Đăng nhập Admin thành công! Đang chuyển hướng...');
                         
                         setTimeout(() => {
-                            window.location.href = 'admin.html';
-                        }, 1000);
+                            // Lưu session data
+                            sessionStorage.setItem('vgmedia_login_time', Date.now());
+                            sessionStorage.setItem('vgmedia_admin', 'true');
+                            
+                            // Force redirect với cache busting
+                            const timestamp = Date.now();
+                            window.location.href = './admin.html?login=' + timestamp + '&admin=' + timestamp + '&auth=' + timestamp;
+                        }, 1500);
                     } else {
                         showError('adminMessage', 'Thông tin đăng nhập admin không chính xác');
                         btnText.textContent = 'Đăng nhập Admin';
@@ -542,6 +597,77 @@
                     }
                 }, 1000);
             });
+            
+            // ============================================
+            // REGISTER FORM SUBMISSION
+            // ============================================
+            if (registerForm) {
+                registerForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const name = document.getElementById('regName').value.trim();
+                    const username = document.getElementById('regUsername').value.trim();
+                    const email = document.getElementById('regEmail').value.trim();
+                    const password = document.getElementById('regPassword').value;
+                    const confirmPassword = document.getElementById('regConfirmPassword').value;
+                    const messageEl = document.getElementById('registerMessage');
+                    const submitBtn = document.getElementById('registerSubmitBtn');
+                    const loading = document.getElementById('registerLoading');
+                    const btnText = submitBtn.querySelector('span');
+                    
+                    // Reset message
+                    messageEl.className = 'message';
+                    messageEl.textContent = '';
+                    
+                    // Validate
+                    if (!name || !username || !email || !password || !confirmPassword) {
+                        showError('registerMessage', 'Vui lòng điền đầy đủ thông tin');
+                        return;
+                    }
+                    
+                    if (password.length < 6) {
+                        showError('registerMessage', 'Mật khẩu phải có ít nhất 6 ký tự');
+                        return;
+                    }
+                    
+                    if (password !== confirmPassword) {
+                        showError('registerMessage', 'Mật khẩu xác nhận không khớp');
+                        return;
+                    }
+                    
+                    // Show loading
+                    btnText.textContent = 'Đang đăng ký...';
+                    loading.classList.add('active');
+                    submitBtn.disabled = true;
+                    
+                    // Perform registration
+                    setTimeout(() => {
+                        // Call register function from auth-fixed.js
+                        if (window.registerUser) {
+                            const result = window.registerUser(username, password, email, name);
+                            
+                            if (result.success) {
+                                showSuccess('registerMessage', result.message || '✅ Đăng ký thành công! Đang chuyển hướng...');
+                                
+                                setTimeout(() => {
+                                    // Auto redirect to home page
+                                    window.location.href = './index.html?registered=true&user=' + username;
+                                }, 2000);
+                            } else {
+                                showError('registerMessage', result.message || 'Đăng ký thất bại');
+                                btnText.textContent = 'Đăng ký';
+                                loading.classList.remove('active');
+                                submitBtn.disabled = false;
+                            }
+                        } else {
+                            showError('registerMessage', 'Hệ thống đăng ký tạm thời không khả dụng');
+                            btnText.textContent = 'Đăng ký';
+                            loading.classList.remove('active');
+                            submitBtn.disabled = false;
+                        }
+                    }, 1000);
+                });
+            }
             
             // Helper Functions
             function showError(elementId, message) {
@@ -558,6 +684,24 @@
             
             // Auto-focus on username field
             document.getElementById('userUsername').focus();
+            
+            // Check if user is already logged in
+            setTimeout(() => {
+                if (window.getCurrentUser && window.getCurrentUser()) {
+                    const user = window.getCurrentUser();
+                    showSuccess('userMessage', `Bạn đã đăng nhập với tài khoản: ${user.name}`);
+                    
+                    setTimeout(() => {
+                        if (user.type === 'admin') {
+                            window.location.href = './admin.html';
+                        } else {
+                            window.location.href = './index.html';
+                        }
+                    }, 2000);
+                }
+            }, 500);
+            
+            console.log('Login page initialized successfully');
         });
     </script>
 </body>
