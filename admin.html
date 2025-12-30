@@ -226,5 +226,50 @@
             }
         });
     </script>
+    <script>
+    // Fix logout trong admin
+    document.addEventListener('DOMContentLoaded', function() {
+        const logoutBtn = document.getElementById('adminLogout');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (confirm('Đăng xuất khỏi admin?')) {
+                    // Xóa auth
+                    localStorage.removeItem('vgmedia_auth');
+                    
+                    // Redirect về login
+                    showNotification('Đã đăng xuất', 'info');
+                    setTimeout(() => {
+                        window.location.href = './login.html';
+                    }, 1000);
+                }
+            });
+        }
+    });
+    
+    // Helper function để show notification
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#FF6584' : '#6C63FF'};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+        `;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+</script>
 </body>
+
 </html>
