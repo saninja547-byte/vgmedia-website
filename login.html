@@ -686,20 +686,27 @@
             document.getElementById('userUsername').focus();
             
             // Check if user is already logged in
-            setTimeout(() => {
-                if (window.getCurrentUser && window.getCurrentUser()) {
-                    const user = window.getCurrentUser();
-                    showSuccess('userMessage', `Bạn đã đăng nhập với tài khoản: ${user.name}`);
-                    
-                    setTimeout(() => {
-                        if (user.type === 'admin') {
-                            window.location.href = './admin.html';
-                        } else {
-                            window.location.href = './index.html';
-                        }
-                    }, 2000);
-                }
-            }, 500);
+            // Check if user is already logged in
+setTimeout(() => {
+    try {
+        if (window.getCurrentUser) {
+            const user = window.getCurrentUser();
+            if (user && user.name) {
+                showSuccess('userMessage', `Bạn đã đăng nhập với tài khoản: ${user.name}`);
+                
+                setTimeout(() => {
+                    if (user.type === 'admin') {
+                        window.location.href = './admin.html';
+                    } else {
+                        window.location.href = './index.html';
+                    }
+                }, 2000);
+            }
+        }
+    } catch (error) {
+        console.log('Không có user đăng nhập:', error.message);
+    }
+}, 500);
             
             console.log('Login page initialized successfully');
         });
