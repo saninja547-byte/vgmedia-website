@@ -7,6 +7,27 @@
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Additional styles for new features */
+        .field-notification {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #6C63FF;
+        }
+        
+        .url-loading {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236C63FF'%3E%3Cpath d='M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
     <div class="admin-container">
@@ -28,6 +49,9 @@
             
             <div class="admin-user">
                 <span id="adminUsername">Quản trị viên</span>
+                <button id="adminLogout" title="Đăng xuất">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
             </div>
         </div>
         
@@ -76,6 +100,11 @@
                         </thead>
                         <tbody id="songsTableBody">
                             <!-- Data loaded by JavaScript -->
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 40px; color: #8A8A8A;">
+                                    <i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -93,23 +122,31 @@
                                 
                                 <div class="form-group">
                                     <label for="editTitle">Tên bài hát *</label>
-                                    <input type="text" id="editTitle" required>
+                                    <input type="text" id="editTitle" required placeholder="Nhập tên bài hát">
+                                    <small class="form-text">Tự động nhận diện từ tên file</small>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="editArtist">Nghệ sĩ *</label>
-                                    <input type="text" id="editArtist" required>
+                                    <input type="text" id="editArtist" required placeholder="Nhập tên nghệ sĩ">
                                 </div>
                                 
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="editGenre">Thể loại *</label>
-                                        <input type="text" id="editGenre" required>
+                                        <input type="text" id="editGenre" required placeholder="EDM, Pop, Hip Hop...">
+                                    </div>
+                                    
+                                    <!-- THÊM FIELD BPM -->
+                                    <div class="form-group">
+                                        <label for="editBPM">BPM (Nhịp)</label>
+                                        <input type="text" id="editBPM" placeholder="128 BPM">
                                     </div>
                                     
                                     <div class="form-group">
                                         <label for="editDuration">Thời lượng (HH:MM:SS) *</label>
-                                        <input type="text" id="editDuration" placeholder="1:25:34" required>
+                                        <input type="text" id="editDuration" placeholder="3:30" required>
+                                        <small class="form-text">Tự động nhận diện từ file</small>
                                     </div>
                                 </div>
                                 
@@ -125,23 +162,27 @@
                                     <div class="form-group">
                                         <label for="editPrice">Giá (VND)</label>
                                         <input type="number" id="editPrice" min="0" value="199000">
+                                        <small class="form-text">0 VND cho bài hát miễn phí</small>
                                     </div>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="editAudioFile">URL file nhạc *</label>
                                     <input type="text" id="editAudioFile" placeholder="https://example.com/song.mp3" required>
-                                    <small class="form-text">Sử dụng URL từ dịch vụ lưu trữ (Cloudinary, Firebase, etc.)</small>
+                                    <small class="form-text" style="color: #6C63FF;">
+                                        <i class="fas fa-magic"></i> Tự động nhận diện thông tin khi bạn paste URL
+                                    </small>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="editThumbnail">Ảnh thumbnail (URL)</label>
                                     <input type="text" id="editThumbnail" placeholder="https://images.unsplash.com/photo-...">
+                                    <small class="form-text">Tự động chọn ảnh mặc định</small>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="editDescription">Mô tả</label>
-                                    <textarea id="editDescription" rows="3"></textarea>
+                                    <textarea id="editDescription" rows="3" placeholder="Mô tả bài hát..."></textarea>
                                 </div>
                                 
                                 <div class="form-actions">
@@ -158,7 +199,32 @@
         </div>
     </div>
     
+    <!-- Load scripts -->
     <script src="./js/music-data.js"></script>
+    <script src="./js/auth.js"></script>
+    <script src="./js/audio-metadata.js"></script>
     <script src="./js/admin-fixed.js"></script>
+    
+    <script>
+        // Logout functionality
+        document.getElementById('adminLogout')?.addEventListener('click', function() {
+            if (confirm('Bạn có chắc muốn đăng xuất?')) {
+                localStorage.removeItem('vgmedia_auth');
+                window.location.href = './login.html';
+            }
+        });
+        
+        // Update admin username
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const user = JSON.parse(localStorage.getItem('vgmedia_auth'));
+                if (user && user.name) {
+                    document.getElementById('adminUsername').textContent = user.name;
+                }
+            } catch (e) {
+                console.log('No user logged in');
+            }
+        });
+    </script>
 </body>
 </html>
