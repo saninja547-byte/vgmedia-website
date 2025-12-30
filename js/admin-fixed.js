@@ -882,5 +882,51 @@ function showNotification(message, type = 'info') {
     document.head.appendChild(style);
 })();
 
+// Thêm hàm logout mạnh mẽ
+function logout() {
+    const user = getCurrentUser();
+    const userName = user ? user.name : 'Khách';
+    
+    // Xóa tất cả auth data
+    localStorage.removeItem('vgmedia_auth');
+    
+    // Xóa remember me
+    localStorage.removeItem('vgmedia_remember_user');
+    
+    // Redirect về trang chủ
+    setTimeout(() => {
+        window.location.href = './index.html';
+    }, 500);
+    
+    return { 
+        success: true, 
+        message: `Đã đăng xuất tài khoản ${userName}` 
+    };
+}
 
+// Thêm hàm logout mạnh (xóa hết)
+function forceLogout() {
+    // Xóa tất cả localStorage liên quan đến auth
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.includes('vgmedia') || key.includes('auth')) {
+            keysToRemove.push(key);
+        }
+    }
+    
+    keysToRemove.forEach(key => {
+        localStorage.removeItem(key);
+    });
+    
+    // Redirect
+    window.location.href = './index.html';
+    
+    return { success: true, message: 'Đã đăng xuất hoàn toàn' };
+}
+
+// Cập nhật trong window object
+window.logout = logout;
+window.forceLogout = forceLogout;
 console.log('✅ Admin Fixed Script v3.0 Ready');
+
