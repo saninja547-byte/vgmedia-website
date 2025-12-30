@@ -276,17 +276,41 @@ function setupEventListeners() {
         });
     }
     
-    // Logout button
+    // Logout button - FIXED
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
             if (confirm('Bạn có chắc muốn đăng xuất?')) {
-                logout();
-                showNotification('Đã đăng xuất thành công', 'success');
-                setTimeout(() => location.reload(), 1000);
+                // Gọi hàm logout
+                const result = window.logout ? window.logout() : { success: false };
+                
+                if (result.success) {
+                    showNotification('✅ Đã đăng xuất thành công!', 'success');
+                    
+                    // Force reload sau 1 giây
+                    setTimeout(() => {
+                        window.location.href = './index.html';
+                        setTimeout(() => {
+                            location.reload(true); // Force reload từ server
+                        }, 100);
+                    }, 1000);
+                } else {
+                    // Fallback: force logout
+                    localStorage.clear();
+                    showNotification('🔄 Đang đăng xuất...', 'info');
+                    setTimeout(() => {
+                        window.location.href = './index.html';
+                    }, 500);
+                }
             }
         });
     }
+    
+    // ... code còn lại ...
+}
     
     // Subscribe button
     const subscribeBtn = document.getElementById('subscribeBtn');
@@ -720,4 +744,5 @@ function setupDemoData() {
         // Reload library
         loadMusicLibrary();
     }
+
 }
