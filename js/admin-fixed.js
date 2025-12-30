@@ -33,7 +33,187 @@ function setupAdminPanel() {
     
     // 2. Setup form auto-detect
     setupAutoDetect();
+    // Thêm nút upload file
+function addUploadButtons() {
+    const audioUrlGroup = document.getElementById('editAudioFile').parentElement;
     
+    // Tạo container cho upload buttons
+    const uploadContainer = document.createElement('div');
+    uploadContainer.style.cssText = `
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    `;
+    
+    // Nút upload audio
+    const audioUploadBtn = document.createElement('button');
+    audioUploadBtn.type = 'button';
+    audioUploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload file MP3 từ máy';
+    audioUploadBtn.style.cssText = `
+        padding: 10px 15px;
+        background: linear-gradient(135deg, #6C63FF, #FF6584);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        flex: 1;
+    `;
+    
+    // Nút upload thumbnail
+    const imageUploadBtn = document.createElement('button');
+    imageUploadBtn.type = 'button';
+    imageUploadBtn.innerHTML = '<i class="fas fa-image"></i> Upload ảnh thumbnail';
+    imageUploadBtn.style.cssText = `
+        padding: 10px 15px;
+        background: rgba(108, 99, 255, 0.2);
+        color: #6C63FF;
+        border: 2px dashed #6C63FF;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        flex: 1;
+    `;
+    
+    // Thêm event listeners
+    audioUploadBtn.addEventListener('click', async () => {
+        await uploadAudioFile();
+    });
+    
+    imageUploadBtn.addEventListener('click', async () => {
+        await uploadImageFile();
+    });
+    
+    uploadContainer.appendChild(audioUploadBtn);
+    uploadContainer.appendChild(imageUploadBtn);
+    audioUrlGroup.appendChild(uploadContainer);
+}
+
+// Upload audio file
+async function uploadAudioFile() {
+    try {
+        if (!window.FileUploaderEnhanced) {
+            showNotification('Lỗi: File uploader không khả dụng', 'error');
+            return;
+        }
+        
+        const uploader = new FileUploaderEnhanced();
+        const file = await uploader.showFilePicker('audio');
+        
+        if (!file) {
+            return;
+        }
+        
+        // Show loading
+        showNotification(`📁 Đang upload: ${file.name}...`, 'info');
+        
+        // Upload file
+        const result = await uploader.uploadFileToLocalStorage(file);
+        
+        if (result.success) {
+            // Lấy metadata
+            const metadata = await uploader.getAudioMetadata(file);
+            
+            // Cập nhật form
+            const audioUrlInput = document.getElementById('editAudioFile');
+            audioUrlInput.value = `local:${result.storageKey}`;
+            
+            // Auto-fill các trường khác
+            const titleInput = document.getElementById('editTitle');
+            if (!titleInput.value.trim()) {
+                titleInput.value = uploader.extractTitleFromFileName(file.name);
+            }
+            
+            const durationInput = document.getElementById('editDuration');
+            if (!durationInput.value.trim()) {
+                durationInput.value = metadata.duration;
+            }
+            
+            // Auto-detect genre từ tên file
+            const genreInput = document.getElementById('editGenre');
+            if (!genreInput.value.trim()) {
+                const title = titleInput.value.toLowerCase();
+                if (title.includes('house')) genreInput.value = 'House';
+                else if (title.includes('techno')) genreInput.value = 'Techno';
+                else if (title.includes('trance')) genreInput.value = 'Trance';
+                else if (title.includes('dubstep')) genreInput.value = 'Dubstep';
+                else if (title.includes('pop')) genreInput.value = 'Pop';
+                else genreInput.value = 'EDM';
+            }
+            
+            showNotification(`✅ Upload thành công: ${file.name} (${metadata.duration})`, 'success');
+        }
+        
+    } catch (error) {
+        console.error('Upload error:', error);
+        showNotification(`❌ Lỗi upload: ${error.message}`, 'error');
+    }
+}
+
+// Upload image file
+async function uploadImageFile() {
+    try {
+        if (!window.FileUploaderEnhanced) {
+            showNotification('Lỗi: File uploader không khả dụng', 'error');
+            return;
+        }
+        
+        const uploader = new FileUploaderEnhanced();
+        const file = await uploader.showFilePicker('image');
+        
+        if (!file) {
+            return;
+        }
+        
+        // Show loading
+        showNotification(`🖼️ Đang upload ảnh: ${file.name}...`, 'info');
+        
+        // Upload file
+        const result = await uploader.uploadFileToLocalStorage(file);
+        
+        if (result.success) {
+            // Cập nhật form
+            const thumbnailInput = document.getElementById('editThumbnail');
+            thumbnailInput.value = `local:${result.storageKey}`;
+            
+            // Hiển thị preview
+            const preview = document.createElement('img');
+            preview.src = result.dataUrl;
+            preview.style.cssText = `
+                max-width: 200px;
+                max-height: 200px;
+                border-radius: 10px;
+                margin-top: 10px;
+                border: 2px solid #6C63FF;
+            `;
+            
+            const parent = thumbnailInput.parentElement;
+            const existingPreview = parent.querySelector('.thumbnail-preview');
+            if (existingPreview) {
+                existingPreview.remove();
+            }
+            
+            preview.className = 'thumbnail-preview';
+            parent.appendChild(preview);
+            
+            showNotification(`✅ Upload ảnh thành công!`, 'success');
+        }
+        
+    } catch (error) {
+        console.error('Upload error:', error);
+        showNotification(`❌ Lỗi upload ảnh: ${error.message}`, 'error');
+    }
+}
+
+// Thêm vào hàm initAdmin
+function initAdmin() {
+    // ... code cũ ...
+    
+    // Thêm nút upload
+    setTimeout(() => {
+        addUploadButtons();
+    }, 1000);
+}
     // 3. Setup modal controls
     setupModalControls();
     
@@ -701,5 +881,6 @@ function showNotification(message, type = 'info') {
     `;
     document.head.appendChild(style);
 })();
+
 
 console.log('✅ Admin Fixed Script v3.0 Ready');
