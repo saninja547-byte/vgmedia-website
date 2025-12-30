@@ -4,202 +4,196 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VGMEDIA - Nền tảng nhạc DJ Remix</title>
-    <style>
-        /* Basic styles */
-        :root {
-            --primary: #6C63FF;
-            --secondary: #FF6584;
-            --dark: #121212;
-            --light: #FFFFFF;
-        }
-        
-        body {
-            background: var(--dark);
-            color: var(--light);
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        header {
-            text-align: center;
-            padding: 50px 20px;
-        }
-        
-        .logo {
-            font-size: 3rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        
-        .logo span {
-            color: var(--primary);
-        }
-        
-        .tagline {
-            font-size: 1.2rem;
-            color: #8A8A8A;
-            margin-bottom: 40px;
-        }
-        
-        .buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 40px;
-        }
-        
-        .btn {
-            padding: 15px 30px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-        }
-        
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--light);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(108, 99, 255, 0.3);
-        }
-        
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            margin-top: 60px;
-        }
-        
-        .feature {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .feature i {
-            font-size: 2.5rem;
-            color: var(--primary);
-            margin-bottom: 20px;
-        }
-        
-        .status {
-            background: rgba(76, 175, 80, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 40px;
-            border-left: 4px solid #4CAF50;
-        }
-        
-        footer {
-            margin-top: 60px;
-            text-align: center;
-            color: #8A8A8A;
-            padding: 30px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-    </style>
+    <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo">VG<span>MEDIA</span></div>
-            <p class="tagline">Nền tảng nhạc DJ Remix chất lượng cao</p>
-            
-            <div class="status">
-                <p><i class="fas fa-sync-alt fa-spin"></i> Website đang được nâng cấp phiên bản 2.0</p>
-                <p>Đăng nhập để trải nghiệm đầy đủ tính năng</p>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <span class="logo-icon">🎵</span>
+                    <h1 class="logo-text">VG<span class="logo-highlight">MEDIA</span></h1>
+                </div>
+                
+                <div class="nav-links">
+                    <a href="#" class="nav-link active"><i class="fas fa-home"></i> Trang chủ</a>
+                    <a href="#library" class="nav-link"><i class="fas fa-music"></i> Thư viện</a>
+                    <a href="#trending" class="nav-link"><i class="fas fa-fire"></i> Trending</a>
+                    <a href="./admin.html" class="nav-link" id="adminLink" style="display: none;"><i class="fas fa-cog"></i> Quản lý</a>
+                </div>
+                
+                <div class="nav-actions">
+                    <button class="btn-subscribe" id="subscribeBtn">
+                        <i class="fas fa-crown"></i> Nâng cấp Premium
+                    </button>
+                    <div class="user-menu" id="userMenu" style="display: none;">
+                        <span id="userName">Khách</span>
+                        <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
+                    </div>
+                    <button class="btn-login" id="loginBtn">
+                        <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container player-container">
+            <!-- Player Card -->
+            <div class="player-card">
+                <!-- Song Info -->
+                <div class="song-info">
+                    <div class="song-thumbnail">
+                        <img id="currentThumbnail" src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f" alt="Song Thumbnail">
+                        <div class="song-badge premium" id="currentBadge">PREMIUM</div>
+                    </div>
+                    
+                    <div class="song-details">
+                        <h2 class="song-title" id="currentTitle">Chào mừng đến VGMEDIA</h2>
+                        <p class="song-artist" id="currentArtist">Hãy đăng nhập để bắt đầu</p>
+                        
+                        <div class="song-actions">
+                            <button class="btn-action btn-play" id="playBtn" onclick="window.location.href='./login.html'">
+                                <i class="fas fa-sign-in-alt"></i> Đăng nhập ngay
+                            </button>
+                            <button class="btn-action btn-like" onclick="window.location.href='./admin.html'">
+                                <i class="fas fa-cog"></i> Trang quản lý
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             
-            <div class="buttons">
-                <a href="./login.html" class="btn btn-primary">
-                    <i class="fas fa-sign-in-alt"></i> Đăng nhập ngay
-                </a>
-                <a href="./admin.html" class="btn btn-secondary">
-                    <i class="fas fa-cog"></i> Trang quản lý
-                </a>
-            </div>
-        </header>
-        
-        <div class="features">
-            <div class="feature">
-                <i class="fas fa-music"></i>
-                <h3>Nhạc chất lượng cao</h3>
-                <p>Nghe nhạc DJ Remix với chất lượng lossless</p>
-            </div>
-            
-            <div class="feature">
-                <i class="fas fa-crown"></i>
-                <h3>Tài khoản Premium</h3>
-                <p>Nghe không giới hạn, tải xuống mọi bài hát</p>
-            </div>
-            
-            <div class="feature">
-                <i class="fas fa-headphones"></i>
-                <h3>Nghe thử miễn phí</h3>
-                <p>Trải nghiệm 2:30 phút mỗi bài hát premium</p>
-            </div>
-            
-            <div class="feature">
-                <i class="fas fa-download"></i>
-                <h3>Tải xuống dễ dàng</h3>
-                <p>Tải bài hát yêu thích về máy</p>
+            <!-- Music Library -->
+            <div class="music-library">
+                <div class="library-header">
+                    <h3><i class="fas fa-music"></i> Bài hát mẫu</h3>
+                </div>
+                
+                <div class="songs-list">
+                    <!-- Demo songs -->
+                    <div class="song-item" onclick="showLoginAlert()">
+                        <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f" class="song-item-img">
+                        <div class="song-item-info">
+                            <div class="song-item-title">Summer Vibes 2024</div>
+                            <div class="song-item-artist">VG Music Collective</div>
+                            <div class="song-item-meta">
+                                <span>3:45</span>
+                                <span>EDM</span>
+                            </div>
+                        </div>
+                        <div class="song-item-price premium">199,000đ</div>
+                    </div>
+                    
+                    <div class="song-item" onclick="showLoginAlert()">
+                        <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d" class="song-item-img">
+                        <div class="song-item-info">
+                            <div class="song-item-title">Midnight Drive</div>
+                            <div class="song-item-artist">Night Riders</div>
+                            <div class="song-item-meta">
+                                <span>4:20</span>
+                                <span>Synthwave</span>
+                            </div>
+                        </div>
+                        <div class="song-item-price free">Miễn phí</div>
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <div style="margin-top: 50px; text-align: center;">
-            <h3>Tài khoản demo để test:</h3>
-            <div style="display: inline-block; text-align: left; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; margin-top: 20px;">
-                <p><strong>Admin:</strong> admin / admin123</p>
-                <p><strong>User:</strong> user / user123</p>
-                <p><strong>Premium:</strong> premium / premium123</p>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>VG<span>MEDIA</span></h2>
+                    <p>Nền tảng nhạc chất lượng cao hàng đầu Việt Nam</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 VGMEDIA. All rights reserved.</p>
             </div>
         </div>
-        
-        <footer>
-            <p>&copy; 2024 VGMEDIA. All rights reserved.</p>
-            <p>Website đang trong giai đoạn phát triển</p>
-            <div style="margin-top: 20px;">
-                <a href="#" style="color: #6C63FF; margin: 0 10px;"><i class="fab fa-facebook"></i></a>
-                <a href="#" style="color: #6C63FF; margin: 0 10px;"><i class="fab fa-youtube"></i></a>
-                <a href="#" style="color: #6C63FF; margin: 0 10px;"><i class="fab fa-instagram"></i></a>
-            </div>
-        </footer>
-    </div>
-    
+    </footer>
+
+    <!-- JavaScript -->
     <script>
-        // Auto redirect to admin if URL has parameter
-        if(window.location.hash === '#admin') {
-            window.location.href = './admin.html';
+        // Check login status
+        function checkLogin() {
+            const auth = localStorage.getItem('vgmedia_auth');
+            if (auth) {
+                try {
+                    const user = JSON.parse(auth);
+                    document.getElementById('userName').textContent = user.name;
+                    document.getElementById('userMenu').style.display = 'flex';
+                    document.getElementById('loginBtn').style.display = 'none';
+                    
+                    if (user.type === 'admin') {
+                        document.getElementById('adminLink').style.display = 'flex';
+                    }
+                    
+                    if (user.isPremium) {
+                        document.getElementById('subscribeBtn').innerHTML = '<i class="fas fa-crown"></i> Premium Member';
+                    }
+                    
+                    // Auto redirect to library if logged in
+                    setTimeout(() => {
+                        window.location.href = '#library';
+                    }, 1000);
+                    
+                } catch (e) {
+                    console.error('Auth parse error:', e);
+                }
+            }
         }
         
-        // Check if user is already logged in
-        if(localStorage.getItem('vgmedia_auth')) {
-            document.querySelector('.tagline').innerHTML = 'Chào mừng trở lại!';
+        // Setup event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLogin();
+            
+            // Login button
+            document.getElementById('loginBtn').addEventListener('click', function() {
+                window.location.href = './login.html';
+            });
+            
+            // Logout button
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('Đăng xuất?')) {
+                    localStorage.removeItem('vgmedia_auth');
+                    location.reload();
+                }
+            });
+            
+            // Subscribe button
+            document.getElementById('subscribeBtn').addEventListener('click', function() {
+                const auth = localStorage.getItem('vgmedia_auth');
+                if (!auth) {
+                    alert('Vui lòng đăng nhập để nâng cấp!');
+                    window.location.href = './login.html';
+                } else {
+                    alert('Tính năng đang phát triển!');
+                }
+            });
+        });
+        
+        function showLoginAlert() {
+            const auth = localStorage.getItem('vgmedia_auth');
+            if (!auth) {
+                if (confirm('Vui lòng đăng nhập để nghe nhạc!\nChuyển đến trang đăng nhập?')) {
+                    window.location.href = './login.html';
+                }
+            }
         }
+        
+        // Auto check login every 2 seconds
+        setInterval(checkLogin, 2000);
     </script>
 </body>
 </html>
