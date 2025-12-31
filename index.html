@@ -151,54 +151,6 @@
             border-color: var(--primary);
         }
         
-        .upload-section {
-            display: none;
-        }
-        
-        .upload-section.visible {
-            display: block;
-        }
-        
-        .upload-area {
-            border: 2px dashed var(--primary);
-            border-radius: var(--radius-lg);
-            padding: 40px;
-            text-align: center;
-            background: rgba(108, 99, 255, 0.05);
-            margin: 20px 0;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .upload-area:hover {
-            background: rgba(108, 99, 255, 0.1);
-            border-color: var(--secondary);
-        }
-        
-        .upload-preview {
-            display: none;
-            margin-top: 20px;
-        }
-        
-        .upload-preview.active {
-            display: block;
-        }
-        
-        .file-preview {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: var(--dark-lighter);
-            padding: 15px;
-            border-radius: var(--radius-md);
-            margin-top: 15px;
-        }
-        
-        .file-preview i {
-            font-size: 2rem;
-            color: var(--primary);
-        }
-        
         .library-stats {
             display: flex;
             gap: 20px;
@@ -237,23 +189,74 @@
             margin-left: 10px;
         }
         
-        .login-required {
-            text-align: center;
-            padding: 40px;
-            background: rgba(108, 99, 255, 0.1);
-            border-radius: var(--radius-lg);
-            margin: 20px 0;
+        /* Styles for song items */
+        .song-item {
+            background: var(--dark-lighter);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
         }
         
-        .login-required i {
-            font-size: 3rem;
-            color: #6C63FF;
-            margin-bottom: 15px;
+        .song-item:hover {
+            background: rgba(108, 99, 255, 0.1);
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+        
+        .song-item.active {
+            background: rgba(108, 99, 255, 0.2);
+            border-color: var(--primary);
+        }
+        
+        .song-item-img {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-sm);
+            object-fit: cover;
+        }
+        
+        .song-item-info {
+            flex: 1;
+        }
+        
+        .song-item-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--light);
+        }
+        
+        .song-item-artist {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+        
+        .song-item-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.8rem;
+            color: var(--gray-light);
+        }
+        
+        .song-item-price {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--secondary);
+            margin-left: auto;
+        }
+        
+        .song-item-price.free {
+            color: var(--success);
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
+    <!-- ==================== HEADER - PHẦN ĐẦU TRANG ==================== -->
     <header class="header">
         <div class="container">
             <nav class="navbar">
@@ -262,19 +265,20 @@
                     <h1 class="logo-text">VG<span class="logo-highlight">MEDIA</span></h1>
                 </div>
                 
+                <!-- ==================== NAVIGATION LINKS - PHẦN MENU ==================== -->
                 <div class="nav-links">
+                    <!-- Chỉ để lại 3 link: Trang chủ, Thư viện, Danh mục -->
                     <a href="#" class="nav-link active"><i class="fas fa-home"></i> Trang chủ</a>
                     <a href="#library" class="nav-link"><i class="fas fa-music"></i> Thư viện</a>
                     <a href="#categories" class="nav-link"><i class="fas fa-tags"></i> Danh mục</a>
-                    <a href="#upload" class="nav-link" id="uploadNavLink" style="display:none;">
-                        <i class="fas fa-upload"></i> Upload
-                        <span class="admin-only-tag">Admin</span>
-                    </a>
+                    <!-- XÓA LINK UPLOAD Ở ĐÂY -->
+                    <!-- Giữ link Admin (chỉ hiện khi đăng nhập admin) -->
                     <a href="./admin.html" class="nav-link" id="adminNavLink" style="display:none;">
                         <i class="fas fa-cog"></i> Quản lý
                     </a>
                 </div>
                 
+                <!-- ==================== USER ACTIONS - PHẦN TÀI KHOẢN ==================== -->
                 <div class="nav-actions">
                     <div class="user-menu" id="userMenu" style="display:none;">
                         <span id="userName">User</span>
@@ -286,9 +290,10 @@
         </div>
     </header>
 
+    <!-- ==================== MAIN CONTENT - PHẦN NỘI DUNG CHÍNH ==================== -->
     <main class="main-content">
         <div class="container">
-            <!-- Player Section -->
+            <!-- ==================== PLAYER SECTION - PHẦN PHÁT NHẠC ==================== -->
             <div class="player-container" id="playerSection">
                 <div class="player-card">
                     <!-- Enhanced Player Visualization -->
@@ -384,48 +389,13 @@
                 </div>
             </div>
             
-            <!-- Upload Section - CHỈ HIỂN THỊ CHO ADMIN -->
-            <div class="music-library upload-section" id="upload">
-                <div class="library-header">
-                    <h3><i class="fas fa-upload"></i> Upload nhạc từ máy tính</h3>
-                    <small style="color: #FFD700; font-weight: 500;">
-                        <i class="fas fa-crown"></i> Chỉ Admin mới có quyền upload
-                    </small>
-                </div>
-                
-                <div class="login-required" id="uploadLoginRequired">
-                    <i class="fas fa-lock"></i>
-                    <h4>Vui lòng đăng nhập với tài khoản Admin</h4>
-                    <p>Chỉ Admin mới có quyền upload bài hát lên hệ thống</p>
-                    <button class="btn-action btn-play" onclick="window.location.href='./login.html'">
-                        <i class="fas fa-sign-in-alt"></i> Đăng nhập Admin
-                    </button>
-                </div>
-                
-                <div id="uploadAreaWrapper" style="display: none;">
-                    <div class="upload-area" id="uploadArea">
-                        <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #6C63FF; margin-bottom: 15px;"></i>
-                        <h4>Kéo thả file nhạc vào đây hoặc click để chọn file</h4>
-                        <p>Hỗ trợ file MP3, WAV, OGG, FLAC, M4A (tối đa 500MB)</p>
-                        <input type="file" id="fileInput" accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac" style="display: none;">
-                    </div>
-                    
-                    <div class="upload-preview" id="uploadPreview">
-                        <div class="file-preview">
-                            <i class="fas fa-file-audio"></i>
-                            <div>
-                                <div id="fileName">--</div>
-                                <div id="fileInfo" style="font-size: 0.9rem; color: #8A8A8A;">--</div>
-                            </div>
-                            <button class="btn-action" id="uploadBtn" style="margin-left: auto;">
-                                <i class="fas fa-upload"></i> Upload
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- ==================== XÓA TOÀN BỘ PHẦN UPLOAD Ở ĐÂY ==================== -->
+            <!-- 
+            PHẦN UPLOAD ĐÃ BỊ XÓA - CHUYỂN SANG TRANG ADMIN
+            <div class="music-library" id="upload">...</div>
+            -->
             
-            <!-- Categories -->
+            <!-- ==================== CATEGORIES SECTION - PHẦN DANH MỤC ==================== -->
             <div class="music-library" id="categories">
                 <div class="library-header">
                     <h3><i class="fas fa-tags"></i> Danh mục thể loại</h3>
@@ -445,7 +415,7 @@
                 </div>
             </div>
             
-            <!-- Music Library -->
+            <!-- ==================== MUSIC LIBRARY SECTION - PHẦN THƯ VIỆN NHẠC ==================== -->
             <div class="music-library" id="library">
                 <div class="library-header">
                     <h3><i class="fas fa-music"></i> Thư viện nhạc VGMEDIA</h3>
@@ -476,14 +446,15 @@
                     </div>
                 </div>
                 
+                <!-- Songs List -->
                 <div class="songs-list" id="songsList">
-                    <!-- Songs will be loaded here -->
+                    <!-- Songs will be loaded here by JavaScript -->
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Enhanced Footer -->
+    <!-- ==================== FOOTER - PHẦN CHÂN TRANG ==================== -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
@@ -539,25 +510,23 @@
     <!-- JavaScript -->
     <script src="./js/music-data.js"></script>
     <script src="./js/auth-fixed.js"></script>
-    <script src="./js/file-upload-enhanced.js"></script>
+    <!-- KHÔNG LOAD file-upload-enhanced.js ở đây nữa -->
     
     <script>
-        // Main Application Script - COMPLETE VERSION
-        console.log('🎵 VGMEDIA Player Enhanced Loaded');
+        // Main Application Script - CHỈ DÀNH CHO USER
+        console.log('🎵 VGMEDIA Player - User Version Loaded');
         
         // Global variables
         let currentSongId = null;
         let isPlaying = false;
         let repeatMode = 'off'; // 'off', 'all', 'one'
-        let selectedFile = null;
         
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Initializing VGMEDIA Enhanced Player...');
+            console.log('🚀 Initializing VGMEDIA Player...');
             
             // Initialize all components
             initAuth();
             initPlayer();
-            initUpload();
             initLibrary();
             initVisualizer();
             
@@ -574,7 +543,6 @@
             const userMenu = document.getElementById('userMenu');
             const userName = document.getElementById('userName');
             const adminNavLink = document.getElementById('adminNavLink');
-            const uploadNavLink = document.getElementById('uploadNavLink');
             const footerLogin = document.getElementById('footerLogin');
             const footerRegister = document.getElementById('footerRegister');
             const footerPremium = document.getElementById('footerPremium');
@@ -588,10 +556,6 @@
                 // Check if user is admin
                 if (user.type === 'admin') {
                     adminNavLink.style.display = 'flex';
-                    uploadNavLink.style.display = 'flex';
-                    document.querySelector('.upload-section').classList.add('visible');
-                    document.getElementById('uploadLoginRequired').style.display = 'none';
-                    document.getElementById('uploadAreaWrapper').style.display = 'block';
                 }
                 
                 // Update footer
@@ -617,12 +581,6 @@
                 loginBtn.style.display = 'block';
                 userMenu.style.display = 'none';
                 adminNavLink.style.display = 'none';
-                uploadNavLink.style.display = 'none';
-                
-                // Show login required for upload section
-                document.querySelector('.upload-section').classList.add('visible');
-                document.getElementById('uploadLoginRequired').style.display = 'block';
-                document.getElementById('uploadAreaWrapper').style.display = 'none';
             }
             
             // Set current year in footer
@@ -645,68 +603,13 @@
             }
         }
         
-        // 3. UPLOAD INIT - CHỈ CHO ADMIN
-        function initUpload() {
-            const uploadArea = document.getElementById('uploadArea');
-            const fileInput = document.getElementById('fileInput');
-            const uploadPreview = document.getElementById('uploadPreview');
-            const uploadBtn = document.getElementById('uploadBtn');
-            
-            // Kiểm tra quyền admin
-            const user = window.getCurrentUser ? window.getCurrentUser() : null;
-            if (!user || user.type !== 'admin') {
-                return; // Không init upload cho user thường
-            }
-            
-            if (!uploadArea || !fileInput) return;
-            
-            // Click upload area to trigger file input
-            uploadArea.addEventListener('click', () => {
-                fileInput.click();
-            });
-            
-            // Drag and drop
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.style.borderColor = '#FF6584';
-                uploadArea.style.background = 'rgba(108, 99, 255, 0.1)';
-            });
-            
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.style.borderColor = '#6C63FF';
-                uploadArea.style.background = '';
-            });
-            
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.style.borderColor = '#6C63FF';
-                uploadArea.style.background = '';
-                
-                if (e.dataTransfer.files.length > 0) {
-                    handleFileSelect(e.dataTransfer.files[0]);
-                }
-            });
-            
-            // File input change
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    handleFileSelect(e.target.files[0]);
-                }
-            });
-            
-            // Upload button
-            if (uploadBtn) {
-                uploadBtn.addEventListener('click', uploadFile);
-            }
-        }
-        
-        // 4. LIBRARY INIT
+        // 3. LIBRARY INIT
         function initLibrary() {
             loadMusicLibrary();
             updateLibraryStats();
         }
         
-        // 5. VISUALIZER INIT
+        // 4. VISUALIZER INIT
         function initVisualizer() {
             const canvas = document.getElementById('audioVisualizer');
             if (!canvas) return;
@@ -719,7 +622,7 @@
             window.audioVisualizer = { canvas, ctx };
         }
         
-        // 6. EVENT LISTENERS SETUP
+        // 5. EVENT LISTENERS SETUP
         function setupEventListeners() {
             // Login button
             document.getElementById('loginBtn')?.addEventListener('click', () => {
@@ -1083,7 +986,11 @@
                     <div style="text-align: center; padding: 40px; color: #8A8A8A; grid-column: 1 / -1;">
                         <i class="fas fa-music" style="font-size: 48px; margin-bottom: 20px; opacity: 0.3;"></i>
                         <h4>Thư viện nhạc trống</h4>
-                        <p>Hãy đăng nhập Admin và thêm bài hát đầu tiên!</p>
+                        <p>Admin chưa thêm bài hát nào</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">
+                            <i class="fas fa-info-circle"></i> 
+                            Chỉ Admin có quyền upload nhạc
+                        </p>
                     </div>
                 `;
                 return;
@@ -1338,118 +1245,6 @@
             }
         }
         
-        // Handle file selection for upload
-        function handleFileSelect(file) {
-            if (!file) return;
-            
-            // Kiểm tra quyền admin
-            const user = window.getCurrentUser ? window.getCurrentUser() : null;
-            if (!user || user.type !== 'admin') {
-                showNotification('❌ Chỉ Admin mới có quyền upload bài hát!', 'error');
-                return;
-            }
-            
-            const fileName = document.getElementById('fileName');
-            const fileInfo = document.getElementById('fileInfo');
-            const uploadPreview = document.getElementById('uploadPreview');
-            
-            if (fileName) fileName.textContent = file.name;
-            if (fileInfo) {
-                const size = (file.size / (1024 * 1024)).toFixed(2);
-                const type = file.type || 'audio/mpeg';
-                fileInfo.textContent = `${type} • ${size} MB`;
-            }
-            
-            if (uploadPreview) uploadPreview.classList.add('active');
-            
-            // Store file for upload
-            selectedFile = file;
-        }
-        
-        // Upload file - CHỈ CHO ADMIN
-        async function uploadFile() {
-            // Kiểm tra quyền admin
-            const user = window.getCurrentUser ? window.getCurrentUser() : null;
-            if (!user || user.type !== 'admin') {
-                showNotification('❌ Chỉ Admin mới có quyền upload bài hát!', 'error');
-                return;
-            }
-            
-            const file = selectedFile;
-            if (!file) {
-                showNotification('Vui lòng chọn file trước khi upload', 'error');
-                return;
-            }
-            
-            const uploadBtn = document.getElementById('uploadBtn');
-            const originalText = uploadBtn.innerHTML;
-            
-            // Show loading
-            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang upload...';
-            uploadBtn.disabled = true;
-            
-            try {
-                // Check if uploader is available
-                if (!window.FileUploaderEnhanced) {
-                    throw new Error('Upload system not available');
-                }
-                
-                const uploader = new FileUploaderEnhanced();
-                const result = await uploader.uploadFileToLocalStorage(file);
-                
-                if (result.success) {
-                    showNotification(`✅ Upload thành công: ${file.name} (${result.fileSize})`, 'success');
-                    
-                    // Get metadata
-                    const metadata = await uploader.getAudioMetadata(file);
-                    
-                    // Add to music library
-                    const songs = window.getMusicLibrary ? window.getMusicLibrary() : [];
-                    const newId = songs.length > 0 ? Math.max(...songs.map(s => s.id)) + 1 : 1;
-                    
-                    const newSong = {
-                        id: newId,
-                        title: uploader.extractTitleFromFileName(file.name),
-                        artist: 'Upload từ Admin',
-                        duration: metadata.duration,
-                        genre: 'EDM',
-                        bpm: '128 BPM',
-                        price: 0, // Mặc định miễn phí
-                        type: 'free',
-                        thumbnail: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f',
-                        audioUrl: result.dataUrl,
-                        description: `Bài hát được upload bởi Admin ${user.name}`,
-                        fileSize: result.fileSize,
-                        uploadedBy: user.username,
-                        uploadedAt: new Date().toISOString()
-                    };
-                    
-                    songs.push(newSong);
-                    localStorage.setItem('vgmedia_music_library', JSON.stringify(songs));
-                    
-                    // Reset form
-                    document.getElementById('uploadPreview').classList.remove('active');
-                    document.getElementById('fileInput').value = '';
-                    selectedFile = null;
-                    
-                    // Reload library
-                    loadMusicLibrary();
-                    updateLibraryStats();
-                    
-                } else {
-                    throw new Error('Upload failed');
-                }
-                
-            } catch (error) {
-                console.error('Upload error:', error);
-                showNotification(`❌ Lỗi upload: ${error.message}`, 'error');
-            } finally {
-                // Reset button
-                uploadBtn.innerHTML = originalText;
-                uploadBtn.disabled = false;
-            }
-        }
-        
         // Update library stats
         function updateLibraryStats() {
             const songs = window.getMusicLibrary ? window.getMusicLibrary() : [];
@@ -1521,7 +1316,7 @@
                     <div style="text-align: center; padding: 40px; color: #8A8A8A; grid-column: 1 / -1;">
                         <i class="fas fa-search" style="font-size: 48px; margin-bottom: 20px; opacity: 0.3;"></i>
                         <h4>Không tìm thấy bài hát</h4>
-                        <p>Thử bộ lọc khác hoặc thêm bài hát mới</p>
+                        <p>Thử bộ lọc khác</p>
                     </div>
                 `;
                 return;
