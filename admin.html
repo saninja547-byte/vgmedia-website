@@ -8,24 +8,145 @@
     <link rel="stylesheet" href="./css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Additional styles for new features */
-        .field-notification {
-            margin-top: 5px;
-            font-size: 12px;
-            color: #6C63FF;
+        /* Thêm styles cho upload section */
+        .upload-section {
+            background: var(--dark-lighter);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px dashed var(--primary);
         }
         
-        .url-loading {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236C63FF'%3E%3Cpath d='M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            background-size: 20px;
-            animation: spin 1s linear infinite;
+        .upload-area {
+            border: 2px dashed var(--primary);
+            border-radius: var(--radius-md);
+            padding: 40px;
+            text-align: center;
+            background: rgba(108, 99, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .upload-area:hover {
+            background: rgba(108, 99, 255, 0.1);
+            border-color: var(--secondary);
+        }
+        
+        .upload-progress {
+            display: none;
+            margin-top: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: var(--radius-md);
+            padding: 15px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #6C63FF, #FF6584);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .upload-preview {
+            display: none;
+            margin-top: 20px;
+            background: rgba(108, 99, 255, 0.1);
+            border-radius: var(--radius-md);
+            padding: 20px;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .file-info i {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+        
+        .upload-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-upload {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #6C63FF, #FF6584);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-upload:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .admin-tabs {
+            display: flex;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .admin-tab {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            color: var(--gray-light);
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .admin-content-section {
+            display: none;
+        }
+        
+        .admin-content-section.active {
+            display: block;
+        }
+        
+        .storage-info {
+            background: rgba(108, 99, 255, 0.1);
+            padding: 15px;
+            border-radius: var(--radius-md);
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: var(--gray-light);
+        }
+        
+        .storage-info.warning {
+            background: rgba(255, 101, 132, 0.1);
+            color: #FF6584;
+        }
+        
+        .warning-icon {
+            color: #FF6584;
+            margin-right: 5px;
         }
     </style>
 </head>
@@ -39,8 +160,11 @@
             </div>
             
             <nav class="admin-nav">
-                <a href="#" class="admin-nav-link active">
+                <a href="#songs" class="admin-nav-link active" data-tab="songs">
                     <i class="fas fa-music"></i> Quản lý bài hát
+                </a>
+                <a href="#upload" class="admin-nav-link" data-tab="upload">
+                    <i class="fas fa-upload"></i> Upload nhạc
                 </a>
                 <a href="./index.html" class="admin-nav-link">
                     <i class="fas fa-home"></i> Về trang chủ
@@ -58,141 +182,285 @@
         <!-- Main Content -->
         <div class="admin-main">
             <header class="admin-header">
-                <h1><i class="fas fa-music"></i> Quản lý bài hát VGMEDIA</h1>
+                <h1><i class="fas fa-cog"></i> Trình quản lý VGMEDIA</h1>
                 <div class="admin-actions">
                     <button class="btn-admin btn-add-song" id="addSongBtn">
-                        <i class="fas fa-plus"></i> Thêm bài hát mới
+                        <i class="fas fa-plus"></i> Thêm bài hát
                     </button>
                 </div>
             </header>
             
-            <div class="admin-content">
-                <!-- Search and Filter -->
-                <div class="admin-toolbar">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="searchSongs" placeholder="Tìm kiếm bài hát...">
+            <!-- Tabs -->
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="songs">Danh sách bài hát</button>
+                <button class="admin-tab" data-tab="upload">Upload nhạc</button>
+                <button class="admin-tab" data-tab="storage">Quản lý bộ nhớ</button>
+            </div>
+            
+            <!-- Songs Management Section -->
+            <div id="songsSection" class="admin-content-section active">
+                <div class="admin-content">
+                    <!-- Search and Filter -->
+                    <div class="admin-toolbar">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchSongs" placeholder="Tìm kiếm bài hát...">
+                        </div>
+                        
+                        <div class="filter-options">
+                            <select id="filterType">
+                                <option value="all">Tất cả bài hát</option>
+                                <option value="premium">Premium</option>
+                                <option value="free">Miễn phí</option>
+                            </select>
+                        </div>
                     </div>
                     
-                    <div class="filter-options">
-                        <select id="filterType">
-                            <option value="all">Tất cả bài hát</option>
-                            <option value="premium">Premium</option>
-                            <option value="free">Miễn phí</option>
-                        </select>
+                    <!-- Songs Table -->
+                    <div class="admin-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Bài hát</th>
+                                    <th>Nghệ sĩ</th>
+                                    <th>Thể loại</th>
+                                    <th>Loại</th>
+                                    <th>Giá (VND)</th>
+                                    <th>Thời lượng</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="songsTableBody">
+                                <!-- Data loaded by JavaScript -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                
-                <!-- Songs Table -->
-                <div class="admin-table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Bài hát</th>
-                                <th>Nghệ sĩ</th>
-                                <th>Thể loại</th>
-                                <th>Loại</th>
-                                <th>Giá (VND)</th>
-                                <th>Thời lượng</th>
-                                <th>Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody id="songsTableBody">
-                            <!-- Data loaded by JavaScript -->
-                            <tr>
-                                <td colspan="8" style="text-align: center; padding: 40px; color: #8A8A8A;">
-                                    <i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            </div>
+            
+            <!-- Upload Section -->
+            <div id="uploadSection" class="admin-content-section">
+                <div class="admin-content">
+                    <div class="upload-section">
+                        <h3><i class="fas fa-cloud-upload-alt"></i> Upload nhạc từ máy tính</h3>
+                        <p>Hỗ trợ file MP3, WAV, OGG, FLAC, M4A, AAC (tối đa 500MB)</p>
+                        
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #6C63FF; margin-bottom: 15px;"></i>
+                            <h4>Kéo thả file nhạc vào đây hoặc click để chọn</h4>
+                            <p>File sẽ được lưu vào bộ nhớ trình duyệt</p>
+                            <input type="file" id="fileInput" accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac" style="display: none;">
+                        </div>
+                        
+                        <!-- Upload Progress -->
+                        <div class="upload-progress" id="uploadProgress">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span id="progressText">Đang xử lý...</span>
+                                <span id="progressPercent">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Upload Preview -->
+                        <div class="upload-preview" id="uploadPreview">
+                            <div class="file-info">
+                                <i class="fas fa-file-audio"></i>
+                                <div>
+                                    <div style="font-weight: bold; color: white;" id="fileName">--</div>
+                                    <div style="color: #8A8A8A; font-size: 0.9rem;" id="fileDetails">--</div>
+                                </div>
+                            </div>
+                            
+                            <div id="metadataPreview" style="margin-top: 15px; display: none;">
+                                <h5 style="margin-bottom: 10px; color: var(--primary);">
+                                    <i class="fas fa-info-circle"></i> Thông tin phát hiện tự động
+                                </h5>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                                    <div>
+                                        <label>Tên bài hát:</label>
+                                        <input type="text" id="autoTitle" class="form-control" placeholder="Tự động nhận diện">
+                                    </div>
+                                    <div>
+                                        <label>Thời lượng:</label>
+                                        <input type="text" id="autoDuration" class="form-control" placeholder="Tự động nhận diện">
+                                    </div>
+                                    <div>
+                                        <label>Thể loại:</label>
+                                        <input type="text" id="autoGenre" class="form-control" placeholder="EDM">
+                                    </div>
+                                    <div>
+                                        <label>BPM:</label>
+                                        <input type="text" id="autoBPM" class="form-control" placeholder="128 BPM">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="upload-actions">
+                                <button class="btn-upload" id="processMetadataBtn">
+                                    <i class="fas fa-magic"></i> Phân tích metadata
+                                </button>
+                                <button class="btn-upload" id="addToLibraryBtn" style="background: #4CAF50;">
+                                    <i class="fas fa-plus"></i> Thêm vào thư viện
+                                </button>
+                                <button class="btn-upload" id="cancelUploadBtn" style="background: var(--dark-lighter); color: var(--gray-light);">
+                                    <i class="fas fa-times"></i> Hủy
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Storage Warning -->
+                        <div class="storage-info warning" id="storageWarning" style="display: none;">
+                            <i class="fas fa-exclamation-triangle warning-icon"></i>
+                            <strong>Chú ý:</strong> Bộ nhớ trình duyệt có thể bị đầy khi upload nhiều file lớn. 
+                            Vui lòng xóa bớt file cũ trong mục "Quản lý bộ nhớ".
+                        </div>
+                    </div>
+                    
+                    <!-- Recently Uploaded -->
+                    <div style="margin-top: 30px;">
+                        <h4><i class="fas fa-history"></i> File đã upload gần đây</h4>
+                        <div id="recentUploads" style="
+                            background: var(--dark-lighter);
+                            border-radius: var(--radius-md);
+                            padding: 20px;
+                            margin-top: 15px;
+                            max-height: 300px;
+                            overflow-y: auto;
+                        ">
+                            <!-- Recent uploads will be shown here -->
+                        </div>
+                    </div>
                 </div>
-                
-                <!-- Edit Modal -->
-                <div id="editModal" class="modal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3><i class="fas fa-edit"></i> <span id="modalTitle">Chỉnh sửa bài hát</span></h3>
-                            <span class="modal-close">&times;</span>
+            </div>
+            
+            <!-- Storage Management Section -->
+            <div id="storageSection" class="admin-content-section">
+                <div class="admin-content">
+                    <h3><i class="fas fa-database"></i> Quản lý bộ nhớ</h3>
+                    <p>Theo dõi và quản lý bộ nhớ được sử dụng bởi VGMEDIA</p>
+                    
+                    <div class="storage-info">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Bộ nhớ đã sử dụng:</span>
+                            <span id="storageUsed">0 MB</span>
                         </div>
-                        <div class="modal-body">
-                            <form id="editSongForm">
-                                <input type="hidden" id="editSongId">
-                                
-                                <div class="form-group">
-                                    <label for="editTitle">Tên bài hát *</label>
-                                    <input type="text" id="editTitle" required placeholder="Nhập tên bài hát">
-                                    <small class="form-text">Tự động nhận diện từ tên file</small>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="editArtist">Nghệ sĩ *</label>
-                                    <input type="text" id="editArtist" required placeholder="Nhập tên nghệ sĩ">
-                                </div>
-                                
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="editGenre">Thể loại *</label>
-                                        <input type="text" id="editGenre" required placeholder="EDM, Pop, Hip Hop...">
-                                    </div>
-                                    
-                                    <!-- THÊM FIELD BPM -->
-                                    <div class="form-group">
-                                        <label for="editBPM">BPM (Nhịp)</label>
-                                        <input type="text" id="editBPM" placeholder="128 BPM">
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label for="editDuration">Thời lượng (HH:MM:SS) *</label>
-                                        <input type="text" id="editDuration" placeholder="3:30" required>
-                                        <small class="form-text">Tự động nhận diện từ file</small>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="editType">Loại bài hát *</label>
-                                        <select id="editType">
-                                            <option value="free">Miễn phí</option>
-                                            <option value="premium">Premium</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label for="editPrice">Giá (VND)</label>
-                                        <input type="number" id="editPrice" min="0" value="199000">
-                                        <small class="form-text">0 VND cho bài hát miễn phí</small>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="editAudioFile">URL file nhạc *</label>
-                                    <input type="text" id="editAudioFile" placeholder="https://example.com/song.mp3" required>
-                                    <small class="form-text" style="color: #6C63FF;">
-                                        <i class="fas fa-magic"></i> Tự động nhận diện thông tin khi bạn paste URL
-                                    </small>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="editThumbnail">Ảnh thumbnail (URL)</label>
-                                    <input type="text" id="editThumbnail" placeholder="https://images.unsplash.com/photo-...">
-                                    <small class="form-text">Tự động chọn ảnh mặc định</small>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="editDescription">Mô tả</label>
-                                    <textarea id="editDescription" rows="3" placeholder="Mô tả bài hát..."></textarea>
-                                </div>
-                                
-                                <div class="form-actions">
-                                    <button type="button" class="btn-admin btn-cancel">Hủy</button>
-                                    <button type="submit" class="btn-admin btn-save">
-                                        <i class="fas fa-save"></i> Lưu bài hát
-                                    </button>
-                                </div>
-                            </form>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                            <span>Số lượng file:</span>
+                            <span id="fileCount">0</span>
                         </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="storageProgress" style="background: #6C63FF;"></div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 30px;">
+                        <h4><i class="fas fa-trash"></i> Dọn dẹp bộ nhớ</h4>
+                        <div style="background: rgba(255, 101, 132, 0.1); padding: 20px; border-radius: var(--radius-md); margin-top: 15px;">
+                            <p style="color: #FF6584; margin-bottom: 15px;">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <strong>Chú ý:</strong> Xóa file sẽ xóa vĩnh viễn khỏi hệ thống
+                            </p>
+                            
+                            <div id="storageFiles" style="margin-bottom: 20px;">
+                                <!-- List of storage files will be shown here -->
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn-upload" id="cleanOldFilesBtn" style="background: #FF9800;">
+                                    <i class="fas fa-broom"></i> Xóa file cũ (7+ ngày)
+                                </button>
+                                <button class="btn-upload" id="cleanAllFilesBtn" style="background: #FF6584;">
+                                    <i class="fas fa-trash-alt"></i> Xóa tất cả file upload
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Edit Modal -->
+            <div id="editModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-edit"></i> <span id="modalTitle">Chỉnh sửa bài hát</span></h3>
+                        <span class="modal-close">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editSongForm">
+                            <input type="hidden" id="editSongId">
+                            
+                            <div class="form-group">
+                                <label for="editTitle">Tên bài hát *</label>
+                                <input type="text" id="editTitle" required placeholder="Nhập tên bài hát">
+                                <small class="form-text">Tự động nhận diện từ tên file</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="editArtist">Nghệ sĩ *</label>
+                                <input type="text" id="editArtist" required placeholder="Nhập tên nghệ sĩ">
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="editGenre">Thể loại *</label>
+                                    <input type="text" id="editGenre" required placeholder="EDM, Pop, Hip Hop...">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="editBPM">BPM (Nhịp)</label>
+                                    <input type="text" id="editBPM" placeholder="128 BPM">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="editDuration">Thời lượng (HH:MM:SS) *</label>
+                                    <input type="text" id="editDuration" placeholder="3:30" required>
+                                    <small class="form-text">Tự động nhận diện từ file</small>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="editType">Loại bài hát *</label>
+                                    <select id="editType">
+                                        <option value="free">Miễn phí</option>
+                                        <option value="premium">Premium</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="editPrice">Giá (VND)</label>
+                                    <input type="number" id="editPrice" min="0" value="199000">
+                                    <small class="form-text">0 VND cho bài hát miễn phí</small>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="editAudioFile">URL file nhạc *</label>
+                                <input type="text" id="editAudioFile" placeholder="local:file_key_or_external_url" required>
+                                <small class="form-text">Sử dụng "local:" cho file upload hoặc URL bên ngoài</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="editThumbnail">Ảnh thumbnail (URL)</label>
+                                <input type="text" id="editThumbnail" placeholder="https://images.unsplash.com/photo-...">
+                                <small class="form-text">Tự động chọn ảnh mặc định</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="editDescription">Mô tả</label>
+                                <textarea id="editDescription" rows="3" placeholder="Mô tả bài hát..."></textarea>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn-admin btn-cancel">Hủy</button>
+                                <button type="submit" class="btn-admin btn-save">
+                                    <i class="fas fa-save"></i> Lưu bài hát
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -201,75 +469,572 @@
     
     <!-- Load scripts -->
     <script src="./js/music-data.js"></script>
-    <script src="./js/auth.js"></script>
+    <script src="./js/auth-fixed.js"></script>
     <script src="./js/audio-metadata.js"></script>
+    <script src="./js/file-upload-enhanced.js"></script>
     <script src="./js/admin-fixed.js"></script>
     
     <script>
-        // Logout functionality
-        document.getElementById('adminLogout')?.addEventListener('click', function() {
-            if (confirm('Bạn có chắc muốn đăng xuất?')) {
-                localStorage.removeItem('vgmedia_auth');
+        // Admin Upload Script
+        console.log('🎵 Admin Upload System Loaded');
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Kiểm tra đăng nhập admin
+            const user = getCurrentUser();
+            if (!user || user.type !== 'admin') {
+                alert('Vui lòng đăng nhập với tài khoản Admin!');
                 window.location.href = './login.html';
+                return;
             }
+            
+            initAdminUpload();
+            initStorageManagement();
+            setupAdminTabs();
+            updateStorageInfo();
+            loadRecentUploads();
         });
         
-        // Update admin username
-        document.addEventListener('DOMContentLoaded', function() {
-            try {
-                const user = JSON.parse(localStorage.getItem('vgmedia_auth'));
-                if (user && user.name) {
-                    document.getElementById('adminUsername').textContent = user.name;
-                }
-            } catch (e) {
-                console.log('No user logged in');
-            }
-        });
-    </script>
-    <script>
-    // Fix logout trong admin
-    document.addEventListener('DOMContentLoaded', function() {
-        const logoutBtn = document.getElementById('adminLogout');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', function(e) {
+        function initAdminUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const uploadProgress = document.getElementById('uploadProgress');
+            const uploadPreview = document.getElementById('uploadPreview');
+            const processMetadataBtn = document.getElementById('processMetadataBtn');
+            const addToLibraryBtn = document.getElementById('addToLibraryBtn');
+            const cancelUploadBtn = document.getElementById('cancelUploadBtn');
+            
+            let currentFile = null;
+            let currentMetadata = null;
+            
+            // Click upload area
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
                 e.preventDefault();
+                uploadArea.style.borderColor = '#FF6584';
+                uploadArea.style.background = 'rgba(108, 99, 255, 0.1)';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = '#6C63FF';
+                uploadArea.style.background = '';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#6C63FF';
+                uploadArea.style.background = '';
                 
-                if (confirm('Đăng xuất khỏi admin?')) {
-                    // Xóa auth
-                    localStorage.removeItem('vgmedia_auth');
-                    
-                    // Redirect về login
-                    showNotification('Đã đăng xuất', 'info');
-                    setTimeout(() => {
-                        window.location.href = './login.html';
-                    }, 1000);
+                if (e.dataTransfer.files.length > 0) {
+                    handleFileSelect(e.dataTransfer.files[0]);
                 }
             });
+            
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+            
+            // Handle file selection
+            async function handleFileSelect(file) {
+                if (!file) return;
+                
+                currentFile = file;
+                
+                // Show file info
+                document.getElementById('fileName').textContent = file.name;
+                const fileSize = (file.size / (1024 * 1024)).toFixed(2);
+                document.getElementById('fileDetails').textContent = 
+                    `${file.type || 'audio/mpeg'} • ${fileSize} MB`;
+                
+                // Show preview and progress
+                uploadPreview.style.display = 'block';
+                uploadProgress.style.display = 'block';
+                
+                // Hide metadata preview initially
+                document.getElementById('metadataPreview').style.display = 'none';
+                
+                // Reset buttons
+                processMetadataBtn.disabled = false;
+                addToLibraryBtn.disabled = true;
+                addToLibraryBtn.innerHTML = '<i class="fas fa-plus"></i> Thêm vào thư viện';
+                
+                // Auto process metadata after a delay
+                setTimeout(() => {
+                    processMetadata();
+                }, 500);
+            }
+            
+            // Process metadata button
+            processMetadataBtn.addEventListener('click', processMetadata);
+            
+            async function processMetadata() {
+                if (!currentFile) return;
+                
+                processMetadataBtn.disabled = true;
+                processMetadataBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang phân tích...';
+                
+                try {
+                    // Use audio metadata extractor
+                    if (window.AudioMetadataExtractor) {
+                        const extractor = new AudioMetadataExtractor();
+                        currentMetadata = await extractor.getBasicInfo(URL.createObjectURL(currentFile));
+                        
+                        // Update form with metadata
+                        document.getElementById('autoTitle').value = extractor.extractTitleFromFileName(currentFile.name);
+                        document.getElementById('autoDuration').value = currentMetadata.duration;
+                        document.getElementById('autoGenre').value = extractor.guessGenre(currentFile.name);
+                        document.getElementById('autoBPM').value = extractor.guessBPM(document.getElementById('autoGenre').value);
+                        
+                        // Show metadata preview
+                        document.getElementById('metadataPreview').style.display = 'block';
+                        
+                        // Enable add to library button
+                        addToLibraryBtn.disabled = false;
+                        
+                        showNotification('✅ Đã phân tích metadata thành công!', 'success');
+                    }
+                } catch (error) {
+                    console.error('Metadata extraction error:', error);
+                    showNotification('⚠️ Không thể phân tích metadata, vui lòng nhập thủ công', 'warning');
+                    
+                    // Still enable add to library
+                    addToLibraryBtn.disabled = false;
+                } finally {
+                    processMetadataBtn.innerHTML = '<i class="fas fa-magic"></i> Phân tích lại metadata';
+                    processMetadataBtn.disabled = false;
+                }
+            }
+            
+            // Add to library button
+            addToLibraryBtn.addEventListener('click', async () => {
+                if (!currentFile) return;
+                
+                addToLibraryBtn.disabled = true;
+                addToLibraryBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+                
+                try {
+                    // Upload file to storage
+                    const uploader = new FileUploaderEnhanced();
+                    
+                    // Show upload progress
+                    uploadProgress.style.display = 'block';
+                    updateProgress(0, 'Đang chuẩn bị upload...');
+                    
+                    // Upload file
+                    const result = await uploadFileWithProgress(currentFile, uploader);
+                    
+                    if (result.success) {
+                        updateProgress(100, 'Upload thành công!');
+                        
+                        // Add to music library
+                        const songs = JSON.parse(localStorage.getItem('vgmedia_music_library') || '[]');
+                        const newId = songs.length > 0 ? Math.max(...songs.map(s => s.id)) + 1 : 1;
+                        
+                        const title = document.getElementById('autoTitle').value || 
+                                    uploader.extractTitleFromFileName(currentFile.name);
+                        const duration = document.getElementById('autoDuration').value || 
+                                       result.metadata?.duration || '0:00';
+                        const genre = document.getElementById('autoGenre').value || 'EDM';
+                        const bpm = document.getElementById('autoBPM').value || '128 BPM';
+                        
+                        const newSong = {
+                            id: newId,
+                            title: title,
+                            artist: 'Nghệ sĩ chưa xác định',
+                            duration: duration,
+                            genre: genre,
+                            bpm: bpm,
+                            price: 0, // Default free
+                            type: 'free',
+                            thumbnail: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=500&q=80',
+                            audioUrl: `local:${result.storageKey}`,
+                            description: 'Bài hát được upload từ Admin',
+                            fileSize: uploader.formatFileSize(currentFile.size),
+                            uploadedBy: getCurrentUser().username,
+                            uploadedAt: new Date().toISOString()
+                        };
+                        
+                        songs.push(newSong);
+                        localStorage.setItem('vgmedia_music_library', JSON.stringify(songs));
+                        
+                        showNotification(`✅ Đã thêm "${title}" vào thư viện!`, 'success');
+                        
+                        // Reset form
+                        setTimeout(() => {
+                            resetUploadForm();
+                            loadRecentUploads();
+                            updateStorageInfo();
+                            
+                            // Switch to songs tab
+                            document.querySelector('.admin-tab[data-tab="songs"]').click();
+                            
+                            // Reload songs table
+                            if (window.loadSongsTable) {
+                                window.loadSongsTable();
+                            }
+                        }, 1000);
+                    }
+                } catch (error) {
+                    console.error('Add to library error:', error);
+                    showNotification(`❌ Lỗi: ${error.message}`, 'error');
+                    addToLibraryBtn.disabled = false;
+                    addToLibraryBtn.innerHTML = '<i class="fas fa-plus"></i> Thử lại';
+                }
+            });
+            
+            // Cancel upload button
+            cancelUploadBtn.addEventListener('click', resetUploadForm);
+            
+            // Upload file with progress
+            async function uploadFileWithProgress(file, uploader) {
+                return new Promise((resolve, reject) => {
+                    // Simulate progress (in real app, this would be actual upload progress)
+                    let progress = 0;
+                    const interval = setInterval(() => {
+                        progress += 10;
+                        updateProgress(progress, `Đang upload: ${progress}%`);
+                        
+                        if (progress >= 90) {
+                            clearInterval(interval);
+                            
+                            // Actually upload the file
+                            uploader.uploadFileToLocalStorage(file)
+                                .then(async (result) => {
+                                    updateProgress(100, 'Đang xử lý metadata...');
+                                    
+                                    // Get metadata
+                                    const metadata = await uploader.getAudioMetadata(file);
+                                    
+                                    resolve({
+                                        success: true,
+                                        storageKey: result.storageKey,
+                                        metadata: metadata
+                                    });
+                                })
+                                .catch(reject);
+                        }
+                    }, 200);
+                });
+            }
+            
+            // Update progress
+            function updateProgress(percent, text) {
+                document.getElementById('progressFill').style.width = percent + '%';
+                document.getElementById('progressPercent').textContent = percent + '%';
+                document.getElementById('progressText').textContent = text;
+            }
+            
+            // Reset upload form
+            function resetUploadForm() {
+                currentFile = null;
+                currentMetadata = null;
+                
+                // Reset UI
+                uploadPreview.style.display = 'none';
+                uploadProgress.style.display = 'none';
+                document.getElementById('metadataPreview').style.display = 'none';
+                document.getElementById('fileInput').value = '';
+                
+                // Reset buttons
+                processMetadataBtn.disabled = false;
+                processMetadataBtn.innerHTML = '<i class="fas fa-magic"></i> Phân tích metadata';
+                addToLibraryBtn.disabled = true;
+                addToLibraryBtn.innerHTML = '<i class="fas fa-plus"></i> Thêm vào thư viện';
+                
+                // Clear form
+                document.getElementById('autoTitle').value = '';
+                document.getElementById('autoDuration').value = '';
+                document.getElementById('autoGenre').value = '';
+                document.getElementById('autoBPM').value = '';
+            }
         }
-    });
-    
-    // Helper function để show notification
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#FF6584' : '#6C63FF'};
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            z-index: 9999;
-            animation: slideIn 0.3s ease;
-        `;
-        notification.textContent = message;
-        document.body.appendChild(notification);
         
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
-    }
-</script>
+        function initStorageManagement() {
+            // Clean old files button
+            document.getElementById('cleanOldFilesBtn')?.addEventListener('click', cleanOldFiles);
+            
+            // Clean all files button
+            document.getElementById('cleanAllFilesBtn')?.addEventListener('click', cleanAllFiles);
+            
+            // Load storage files list
+            loadStorageFiles();
+        }
+        
+        function setupAdminTabs() {
+            const tabs = document.querySelectorAll('.admin-tab');
+            const navLinks = document.querySelectorAll('.admin-nav-link');
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.dataset.tab;
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update active section
+                    document.querySelectorAll('.admin-content-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    document.getElementById(tabId + 'Section').classList.add('active');
+                    
+                    // Update nav link
+                    navLinks.forEach(link => {
+                        if (link.dataset.tab === tabId) {
+                            link.classList.add('active');
+                        } else {
+                            link.classList.remove('active');
+                        }
+                    });
+                    
+                    // Update storage info when switching to storage tab
+                    if (tabId === 'storage') {
+                        updateStorageInfo();
+                        loadStorageFiles();
+                    }
+                    
+                    // Update recent uploads when switching to upload tab
+                    if (tabId === 'upload') {
+                        loadRecentUploads();
+                        updateStorageInfo();
+                    }
+                });
+            });
+            
+            // Nav link switching
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (this.hash === '#upload' || this.hash === '#songs') {
+                        e.preventDefault();
+                        const tabId = this.hash.substring(1);
+                        document.querySelector(`.admin-tab[data-tab="${tabId}"]`).click();
+                    }
+                });
+            });
+        }
+        
+        function updateStorageInfo() {
+            const uploader = new FileUploaderEnhanced();
+            const files = uploader.getAllUploadedFiles();
+            
+            // Calculate total size
+            let totalSize = 0;
+            files.forEach(file => {
+                totalSize += file.size || 0;
+            });
+            
+            const usedMB = (totalSize / (1024 * 1024)).toFixed(2);
+            const maxMB = 50; // LocalStorage limit (approx)
+            const percent = Math.min((usedMB / maxMB) * 100, 100);
+            
+            // Update UI
+            document.getElementById('storageUsed').textContent = usedMB + ' MB';
+            document.getElementById('fileCount').textContent = files.length;
+            document.getElementById('storageProgress').style.width = percent + '%';
+            
+            // Show warning if storage is almost full
+            const storageWarning = document.getElementById('storageWarning');
+            if (percent > 80) {
+                storageWarning.style.display = 'block';
+            } else {
+                storageWarning.style.display = 'none';
+            }
+        }
+        
+        function loadRecentUploads() {
+            const uploader = new FileUploaderEnhanced();
+            const files = uploader.getAllUploadedFiles();
+            const recentUploads = document.getElementById('recentUploads');
+            
+            // Sort by upload time (newest first)
+            files.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+            
+            if (files.length === 0) {
+                recentUploads.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #8A8A8A;">
+                        <i class="fas fa-file-audio" style="font-size: 2rem; opacity: 0.3;"></i>
+                        <p>Chưa có file nào được upload</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            files.slice(0, 10).forEach(file => {
+                const date = new Date(file.uploadedAt).toLocaleDateString('vi-VN');
+                const size = uploader.formatFileSize(file.size);
+                
+                html += `
+                    <div style="
+                        display: flex; align-items: center; justify-content: space-between;
+                        padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);
+                    ">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-file-audio" style="color: #6C63FF;"></i>
+                            <div>
+                                <div style="font-weight: 500; color: white;">${file.name}</div>
+                                <div style="font-size: 0.8rem; color: #8A8A8A;">${size} • ${date}</div>
+                            </div>
+                        </div>
+                        <button class="delete-file-btn" data-key="${file.key}" style="
+                            background: rgba(255, 101, 132, 0.2); color: #FF6584; border: none;
+                            padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8rem;
+                        ">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            
+            recentUploads.innerHTML = html;
+            
+            // Add delete event listeners
+            document.querySelectorAll('.delete-file-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const key = this.dataset.key;
+                    if (confirm('Xóa file này?')) {
+                        const uploader = new FileUploaderEnhanced();
+                        uploader.deleteUploadedFile(key);
+                        showNotification('✅ Đã xóa file', 'success');
+                        loadRecentUploads();
+                        updateStorageInfo();
+                        loadStorageFiles();
+                    }
+                });
+            });
+        }
+        
+        function loadStorageFiles() {
+            const uploader = new FileUploaderEnhanced();
+            const files = uploader.getAllUploadedFiles();
+            const storageFiles = document.getElementById('storageFiles');
+            
+            if (files.length === 0) {
+                storageFiles.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #8A8A8A;">
+                        <i class="fas fa-database" style="font-size: 2rem; opacity: 0.3;"></i>
+                        <p>Không có file nào trong bộ nhớ</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div style="max-height: 200px; overflow-y: auto;">';
+            
+            files.forEach(file => {
+                const date = new Date(file.uploadedAt).toLocaleDateString('vi-VN');
+                const size = uploader.formatFileSize(file.size);
+                const daysOld = Math.floor((Date.now() - new Date(file.uploadedAt).getTime()) / (1000 * 60 * 60 * 24));
+                
+                html += `
+                    <div style="
+                        display: flex; align-items: center; justify-content: space-between;
+                        padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.05);
+                    ">
+                        <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                            <input type="checkbox" class="file-checkbox" data-key="${file.key}" style="margin-right: 5px;">
+                            <i class="fas fa-file-audio" style="color: #6C63FF;"></i>
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-weight: 500; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${file.name}</div>
+                                <div style="font-size: 0.8rem; color: #8A8A8A;">${size} • ${date} • ${daysOld} ngày</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            
+            storageFiles.innerHTML = html;
+        }
+        
+        function cleanOldFiles() {
+            const uploader = new FileUploaderEnhanced();
+            const files = uploader.getAllUploadedFiles();
+            const cutoffTime = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 days
+            
+            let deletedCount = 0;
+            
+            files.forEach(file => {
+                if (new Date(file.uploadedAt).getTime() < cutoffTime) {
+                    uploader.deleteUploadedFile(file.key);
+                    deletedCount++;
+                }
+            });
+            
+            showNotification(`✅ Đã xóa ${deletedCount} file cũ`, 'success');
+            updateStorageInfo();
+            loadStorageFiles();
+            loadRecentUploads();
+        }
+        
+        function cleanAllFiles() {
+            if (confirm('XÓA TẤT CẢ FILE UPLOAD?\nHành động này không thể hoàn tác!')) {
+                const uploader = new FileUploaderEnhanced();
+                const files = uploader.getAllUploadedFiles();
+                
+                files.forEach(file => {
+                    uploader.deleteUploadedFile(file.key);
+                });
+                
+                showNotification(`✅ Đã xóa tất cả ${files.length} file`, 'success');
+                updateStorageInfo();
+                loadStorageFiles();
+                loadRecentUploads();
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed; top: 20px; right: 20px;
+                background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#FF6584' : '#6C63FF'};
+                color: white; padding: 12px 20px; border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 9999;
+                animation: slideIn 0.3s ease;
+                display: flex; align-items: center; gap: 10px;
+            `;
+            
+            const icon = type === 'success' ? 'fa-check-circle' : 
+                        type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+            
+            notification.innerHTML = `<i class="fas ${icon}"></i><span>${message}</span>`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+        
+        // Add animation styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+            .form-control {
+                width: 100%; padding: 8px 12px; margin-top: 5px;
+                background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 6px; color: white; font-size: 0.9rem;
+            }
+            .form-control:focus {
+                outline: none; border-color: #6C63FF;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
-
 </html>
