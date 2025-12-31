@@ -3,1573 +3,652 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VGMEDIA - Nền tảng nhạc DJ Remix</title>
-    <link rel="stylesheet" href="./css/style.css">
+    <title>Music Hub - Upload Nhạc Chuyên Nghiệp</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Additional styles for enhanced features */
-        .player-visualization {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #fd79a8;
+            --dark: #2d3436;
+            --light: #f8f9fa;
+            --glow: rgba(108, 92, 231, 0.6);
+            --neon-glow: rgba(253, 121, 168, 0.8);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
             position: relative;
-            height: 300px;
-            background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(18,18,18,1) 100%);
-            border-radius: var(--radius-lg);
-            margin-bottom: 30px;
+        }
+
+        /* Hiệu ứng ánh đèn mờ nền */
+        .lights-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
             overflow: hidden;
         }
-        
-        .disc-container {
+
+        .light {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 2;
-        }
-        
-        .disc {
-            width: 200px;
-            height: 200px;
-            background: radial-gradient(circle, #111 30%, #222 70%, #333 100%);
             border-radius: 50%;
+            background: radial-gradient(circle, var(--glow), transparent 70%);
+            filter: blur(40px);
+            opacity: 0.3;
+            animation: float 15s infinite linear;
+        }
+
+        .light:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: 10%;
+            left: 10%;
+            background: radial-gradient(circle, var(--neon-glow), transparent 70%);
+            animation-delay: 0s;
+        }
+
+        .light:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 5s;
+        }
+
+        .light:nth-child(3) {
+            width: 250px;
+            height: 250px;
+            bottom: 10%;
+            left: 20%;
+            background: radial-gradient(circle, #00cec9, transparent 70%);
+            animation-delay: 10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(100px, 50px) rotate(90deg); }
+            50% { transform: translate(50px, 100px) rotate(180deg); }
+            75% { transform: translate(-50px, 50px) rotate(270deg); }
+        }
+
+        /* Container chính */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
             position: relative;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
-            animation: disc-rotate 20s linear infinite;
-            animation-play-state: paused;
-        }
-        
-        .disc-grooves {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            height: 90%;
-            border-radius: 50%;
-            background: repeating-radial-gradient(
-                circle at center,
-                transparent,
-                transparent 2px,
-                rgba(255,255,255,0.05) 2px,
-                rgba(255,255,255,0.05) 4px
-            );
-        }
-        
-        .disc-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #6C63FF, #FF6584);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 3;
-        }
-        
-        .disc-center-inner {
-            width: 12px;
-            height: 12px;
-            background: #121212;
-            border-radius: 50%;
-        }
-        
-        .disc-label {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #121212;
-            font-size: 12px;
-            text-align: center;
-            padding: 10px;
-        }
-        
-        .audio-visualizer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
             z-index: 1;
         }
-        
-        .light-effects {
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--accent);
+            text-shadow: 0 0 20px var(--neon-glow);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .logo h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px rgba(108, 92, 231, 0.3);
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+
+        /* Upload Area */
+        .upload-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
+                        0 0 100px rgba(108, 92, 231, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--accent), var(--primary));
+            z-index: -1;
+            border-radius: 27px;
+            animation: borderGlow 3s linear infinite;
+        }
+
+        @keyframes borderGlow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .upload-area {
+            border: 3px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 60px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.05);
+            transform: translateY(-5px);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: block;
+            animation: bounce 3s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .upload-text h3 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: var(--light);
+        }
+
+        .upload-text p {
+            color: var(--secondary);
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .browse-btn {
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.3);
+        }
+
+        .browse-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(108, 92, 231, 0.4);
+        }
+
+        .browse-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .browse-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            display: none;
+            margin-top: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 10px;
+            position: relative;
+            transition: width 0.3s ease;
+        }
+
+        .progress-fill::after {
+            content: '';
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), 
-                rgba(108, 99, 255, 0.3) 0%, 
-                rgba(255, 101, 132, 0.1) 40%, 
-                transparent 70%);
-            pointer-events: none;
-            transition: background 0.1s;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.4), 
+                transparent);
+            animation: shine 2s infinite;
         }
-        
-        @keyframes disc-rotate {
-            from { transform: translate(-50%, -50%) rotate(0deg); }
-            to { transform: translate(-50%, -50%) rotate(360deg); }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
-        
-        .playing .disc {
-            animation-play-state: running;
+
+        /* Music List */
+        .music-list {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
-        .category-filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 20px 0;
-        }
-        
-        .category-filter {
-            padding: 8px 20px;
-            background: var(--dark-lighter);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            color: var(--gray-light);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .category-filter:hover,
-        .category-filter.active {
-            background: var(--gradient-primary);
-            color: white;
-            border-color: var(--primary);
-        }
-        
-        .library-stats {
-            display: flex;
-            gap: 20px;
+
+        .section-title {
+            font-size: 2rem;
             margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-        
-        .stat-card {
-            flex: 1;
-            min-width: 200px;
-            background: var(--dark-lighter);
-            padding: 20px;
-            border-radius: var(--radius-md);
-            border-left: 4px solid var(--primary);
-        }
-        
-        .stat-card h4 {
-            color: var(--gray);
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-        }
-        
-        .stat-card p {
-            font-size: 1.5rem;
-            font-weight: bold;
             color: var(--light);
-        }
-        
-        .admin-only-tag {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: #000;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-        
-        /* Styles for song items */
-        .song-item {
-            background: var(--dark-lighter);
-            border-radius: var(--radius-md);
-            padding: 20px;
             display: flex;
             align-items: center;
             gap: 15px;
-            cursor: pointer;
+        }
+
+        .section-title i {
+            color: var(--accent);
+        }
+
+        .music-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .music-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 25px;
             transition: all 0.3s ease;
-            border: 1px solid transparent;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
         }
-        
-        .song-item:hover {
-            background: rgba(108, 99, 255, 0.1);
+
+        .music-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.1);
             border-color: var(--primary);
-            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
         }
-        
-        .song-item.active {
-            background: rgba(108, 99, 255, 0.2);
-            border-color: var(--primary);
+
+        .music-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
         }
-        
-        .song-item-img {
-            width: 60px;
-            height: 60px;
-            border-radius: var(--radius-sm);
-            object-fit: cover;
+
+        .music-card:hover::before {
+            transform: scaleX(1);
         }
-        
-        .song-item-info {
-            flex: 1;
+
+        .music-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 15px;
         }
-        
-        .song-item-title {
-            font-weight: 600;
-            margin-bottom: 5px;
+
+        .music-info h4 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
             color: var(--light);
         }
-        
-        .song-item-artist {
+
+        .music-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--secondary);
             font-size: 0.9rem;
-            color: var(--gray);
+            margin-bottom: 20px;
+        }
+
+        .music-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Thông báo */
+        .notification-container {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+
+        .notification {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary);
+            transform: translateX(400px);
+            opacity: 0;
+            animation: slideIn 0.5s forwards, shineNotification 3s infinite;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes slideIn {
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes shineNotification {
+            0%, 100% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
+            50% { box-shadow: 0 10px 30px var(--glow); }
+        }
+
+        .notification::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.1), 
+                transparent);
+            animation: lightSweep 3s infinite;
+        }
+
+        @keyframes lightSweep {
+            0% { left: -100%; }
+            20%, 100% { left: 100%; }
+        }
+
+        .notification.success {
+            border-left-color: #00b894;
+        }
+
+        .notification.error {
+            border-left-color: #d63031;
+        }
+
+        .notification.warning {
+            border-left-color: #fdcb6e;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+        }
+
+        .notification.success .notification-icon {
+            color: #00b894;
+        }
+
+        .notification.error .notification-icon {
+            color: #d63031;
+        }
+
+        .notification.warning .notification-icon {
+            color: #fdcb6e;
+        }
+
+        .notification-text h4 {
+            font-size: 1.1rem;
             margin-bottom: 5px;
         }
-        
-        .song-item-meta {
-            display: flex;
-            gap: 15px;
-            font-size: 0.8rem;
-            color: var(--gray-light);
-        }
-        
-        .song-item-price {
-            font-weight: 700;
-            font-size: 1.1rem;
+
+        .notification-text p {
+            font-size: 0.9rem;
             color: var(--secondary);
-            margin-left: auto;
         }
-        
-        .song-item-price.free {
-            color: var(--success);
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            color: var(--secondary);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .upload-container,
+            .music-list {
+                padding: 25px;
+            }
+            
+            .music-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .logo h1 {
+                font-size: 2rem;
+            }
+            
+            .notification-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- ==================== HEADER - PHẦN ĐẦU TRANG ==================== -->
-    <header class="header">
-        <div class="container">
-            <nav class="navbar">
-                <div class="logo">
-                    <span class="logo-icon">🎵</span>
-                    <h1 class="logo-text">VG<span class="logo-highlight">MEDIA</span></h1>
-                </div>
-                
-                <!-- ==================== NAVIGATION LINKS - PHẦN MENU ==================== -->
-                <div class="nav-links">
-                    <!-- Chỉ để lại 3 link: Trang chủ, Thư viện, Danh mục -->
-                    <a href="#" class="nav-link active"><i class="fas fa-home"></i> Trang chủ</a>
-                    <a href="#library" class="nav-link"><i class="fas fa-music"></i> Thư viện</a>
-                    <a href="#categories" class="nav-link"><i class="fas fa-tags"></i> Danh mục</a>
-                    <!-- XÓA LINK UPLOAD Ở ĐÂY -->
-                    <!-- Giữ link Admin (chỉ hiện khi đăng nhập admin) -->
-                    <a href="./admin.html" class="nav-link" id="adminNavLink" style="display:none;">
-                        <i class="fas fa-cog"></i> Quản lý
-                    </a>
-                </div>
-                
-                <!-- ==================== USER ACTIONS - PHẦN TÀI KHOẢN ==================== -->
-                <div class="nav-actions">
-                    <div class="user-menu" id="userMenu" style="display:none;">
-                        <span id="userName">User</span>
-                        <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
-                    </div>
-                    <button class="btn-login" id="loginBtn">Đăng nhập</button>
-                </div>
-            </nav>
-        </div>
-    </header>
+    <!-- Hiệu ứng ánh đèn nền -->
+    <div class="lights-container">
+        <div class="light"></div>
+        <div class="light"></div>
+        <div class="light"></div>
+    </div>
 
-    <!-- ==================== MAIN CONTENT - PHẦN NỘI DUNG CHÍNH ==================== -->
-    <main class="main-content">
-        <div class="container">
-            <!-- ==================== PLAYER SECTION - PHẦN PHÁT NHẠC ==================== -->
-            <div class="player-container" id="playerSection">
-                <div class="player-card">
-                    <!-- Enhanced Player Visualization -->
-                    <div class="player-visualization" id="playerVisualization">
-                        <canvas class="audio-visualizer" id="audioVisualizer"></canvas>
-                        <div class="light-effects" id="lightEffects"></div>
-                        
-                        <div class="disc-container">
-                            <div class="disc" id="disc">
-                                <div class="disc-grooves"></div>
-                                <div class="disc-label">VGMEDIA</div>
-                                <div class="disc-center">
-                                    <div class="disc-center-inner"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Song Info -->
-                    <div class="song-info">
-                        <div class="song-thumbnail">
-                            <img id="currentThumbnail" src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=500&q=80" alt="Song Thumbnail">
-                            <div class="song-badge premium" id="currentBadge">PREMIUM</div>
-                        </div>
-                        
-                        <div class="song-details">
-                            <h2 class="song-title" id="currentTitle">Chào mừng đến VGMEDIA</h2>
-                            <p class="song-artist" id="currentArtist">Hãy chọn bài hát để bắt đầu</p>
-                            
-                            <div class="song-meta" id="songMeta">
-                                <span class="song-duration" id="currentDuration"><i class="fas fa-clock"></i> 0:00</span>
-                                <span class="song-genre" id="currentGenre"><i class="fas fa-tag"></i> --</span>
-                                <span class="song-bpm" id="currentBPM"><i class="fas fa-tachometer-alt"></i> -- BPM</span>
-                                <span class="song-size" id="currentSize"><i class="fas fa-database"></i> -- MB</span>
-                            </div>
-                            
-                            <p class="song-description" id="currentDescription">
-                                Nền tảng nhạc chất lượng cao. Đăng nhập để trải nghiệm đầy đủ tính năng.
-                            </p>
-                            
-                            <div class="song-actions">
-                                <button class="btn-action btn-play" id="playBtn">
-                                    <i class="fas fa-play"></i> Phát nhạc
-                                </button>
-                                <button class="btn-action btn-pause" id="pauseBtn">
-                                    <i class="fas fa-pause"></i> Tạm dừng
-                                </button>
-                                <button class="btn-action btn-like" id="likeBtn">
-                                    <i class="far fa-heart"></i> Yêu thích
-                                </button>
-                                <button class="btn-action btn-download" id="downloadBtn">
-                                    <i class="fas fa-download"></i> Tải xuống
-                                </button>
-                                <button class="btn-action btn-buy" id="buyBtn">
-                                    <i class="fas fa-shopping-cart"></i> Mua bài hát
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Player Controls -->
-                    <div class="player-controls">
-                        <div class="progress-container">
-                            <div class="progress-time current-time" id="currentTime">00:00</div>
-                            <div class="progress-bar" id="progressBar">
-                                <div class="progress" id="songProgress"></div>
-                                <div class="progress-handle" id="progressHandle"></div>
-                            </div>
-                            <div class="progress-time total-time" id="totalTime">00:00</div>
-                        </div>
-                        
-                        <div class="control-buttons">
-                            <button class="control-btn" id="prevBtn">
-                                <i class="fas fa-step-backward"></i>
-                            </button>
-                            <button class="control-btn btn-play-main" id="playMainBtn">
-                                <i class="fas fa-play"></i>
-                            </button>
-                            <button class="control-btn" id="nextBtn">
-                                <i class="fas fa-step-forward"></i>
-                            </button>
-                            
-                            <div class="volume-control">
-                                <i class="fas fa-volume-up volume-icon" id="volumeIcon"></i>
-                                <input type="range" min="0" max="100" value="80" class="volume-slider" id="volumeSlider">
-                            </div>
-                            
-                            <button class="control-btn" id="repeatBtn">
-                                <i class="fas fa-redo"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+    <!-- Container chính -->
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-music"></i>
+                <h1>MUSIC HUB PRO</h1>
             </div>
-            
-            <!-- ==================== XÓA TOÀN BỘ PHẦN UPLOAD Ở ĐÂY ==================== -->
-            <!-- 
-            PHẦN UPLOAD ĐÃ BỊ XÓA - CHUYỂN SANG TRANG ADMIN
-            <div class="music-library" id="upload">...</div>
-            -->
-            
-            <!-- ==================== CATEGORIES SECTION - PHẦN DANH MỤC ==================== -->
-            <div class="music-library" id="categories">
-                <div class="library-header">
-                    <h3><i class="fas fa-tags"></i> Danh mục thể loại</h3>
-                </div>
-                
-                <div class="category-filters">
-                    <div class="category-filter active" data-genre="all">Tất cả</div>
-                    <div class="category-filter" data-genre="EDM">EDM</div>
-                    <div class="category-filter" data-genre="House">House</div>
-                    <div class="category-filter" data-genre="Techno">Techno</div>
-                    <div class="category-filter" data-genre="Trance">Trance</div>
-                    <div class="category-filter" data-genre="Dubstep">Dubstep</div>
-                    <div class="category-filter" data-genre="Pop">Pop</div>
-                    <div class="category-filter" data-genre="Hip Hop">Hip Hop</div>
-                    <div class="category-filter" data-genre="Rock">Rock</div>
-                    <div class="category-filter" data-genre="Jazz">Jazz</div>
-                </div>
-            </div>
-            
-            <!-- ==================== MUSIC LIBRARY SECTION - PHẦN THƯ VIỆN NHẠC ==================== -->
-            <div class="music-library" id="library">
-                <div class="library-header">
-                    <h3><i class="fas fa-music"></i> Thư viện nhạc VGMEDIA</h3>
-                    <div class="library-filters">
-                        <button class="filter-btn active" data-filter="all">Tất cả</button>
-                        <button class="filter-btn" data-filter="free">Miễn phí</button>
-                        <button class="filter-btn" data-filter="premium">Premium</button>
-                    </div>
-                </div>
-                
-                <!-- Library Stats -->
-                <div class="library-stats">
-                    <div class="stat-card">
-                        <h4>Tổng số bài hát</h4>
-                        <p id="totalSongs">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h4>Miễn phí</h4>
-                        <p id="freeSongs">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h4>Premium</h4>
-                        <p id="premiumSongs">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h4>Tổng thời lượng</h4>
-                        <p id="totalDuration">0 giờ</p>
-                    </div>
-                </div>
-                
-                <!-- Songs List -->
-                <div class="songs-list" id="songsList">
-                    <!-- Songs will be loaded here by JavaScript -->
-                </div>
-            </div>
-        </div>
-    </main>
+            <p class="tagline">Upload và quản lý nhạc chất lượng cao</p>
+        </header>
 
-    <!-- ==================== FOOTER - PHẦN CHÂN TRANG ==================== -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <h2>VG<span>MEDIA</span></h2>
-                    <p>Nền tảng nhạc chất lượng cao hàng đầu Việt Nam</p>
-                    <div class="social-links" style="margin-top: 20px;">
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-tiktok"></i></a>
-                    </div>
+        <!-- Upload Section -->
+        <section class="upload-container">
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                <div class="upload-text">
+                    <h3>Kéo thả file nhạc của bạn</h3>
+                    <p>Hỗ trợ MP3, WAV, FLAC, AAC • Tối đa 200MB</p>
+                    <button class="browse-btn" id="browseBtn">
+                        <i class="fas fa-folder-open"></i> Chọn File
+                    </button>
                 </div>
-                
-                <div class="footer-links">
-                    <div class="footer-column">
-                        <h4>Khám phá</h4>
-                        <a href="#playerSection">Nghe nhạc</a>
-                        <a href="#library">Thư viện</a>
-                        <a href="#categories">Thể loại</a>
-                    </div>
-                    
-                    <div class="footer-column">
-                        <h4>Tài khoản</h4>
-                        <a href="./login.html" id="footerLogin">Đăng nhập</a>
-                        <a href="./login.html" id="footerRegister">Đăng ký</a>
-                        <a href="#" id="footerPremium">Premium</a>
-                        <a href="#" id="footerHelp">Hỗ trợ</a>
-                    </div>
-                    
-                    <div class="footer-column">
-                        <h4>VGMEDIA</h4>
-                        <a href="#">Về chúng tôi</a>
-                        <a href="#">Điều khoản</a>
-                        <a href="#">Bảo mật</a>
-                        <a href="#">Liên hệ</a>
-                    </div>
+                <input type="file" id="fileInput" class="file-input" accept="audio/*" multiple>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-info">
+                    <span id="fileName">Đang xử lý...</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
                 </div>
             </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2024 VGMEDIA. All rights reserved. | <span id="currentYear"></span></p>
-                <p style="color: #8A8A8A; font-size: 0.9rem; margin-top: 5px;">
-                    <i class="fas fa-headphones"></i> Đang phát: <span id="footerCurrentSong">Chưa có bài hát</span>
-                </p>
+        </section>
+
+        <!-- Music List -->
+        <section class="music-list">
+            <h2 class="section-title">
+                <i class="fas fa-headphones-alt"></i> Thư viện nhạc
+            </h2>
+            <div class="music-grid" id="musicGrid">
+                <!-- Music cards sẽ được thêm động ở đây -->
             </div>
-        </div>
-    </footer>
+        </section>
 
-    <!-- Audio Element -->
-    <audio id="audioPlayer" preload="metadata"></audio>
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="totalFiles">0</span>
+                    <span class="stat-label">Tổng bài hát</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="totalSize">0 MB</span>
+                    <span class="stat-label">Tổng dung lượng</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="lastUpload">Hôm nay</span>
+                    <span class="stat-label">Upload gần nhất</span>
+                </div>
+            </div>
+            <p>&copy; 2024 Music Hub Pro. All rights reserved.</p>
+        </footer>
+    </div>
 
-    <!-- JavaScript -->
-    <script src="./js/music-data.js"></script>
-    <script src="./js/auth-fixed.js"></script>
-    <!-- KHÔNG LOAD file-upload-enhanced.js ở đây nữa -->
-    
+    <!-- Notification Container -->
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/vi.min.js"></script>
     <script>
-        // Main Application Script - CHỈ DÀNH CHO USER
-        console.log('🎵 VGMEDIA Player - User Version Loaded');
-        
-        // Global variables
-        let currentSongId = null;
-        let isPlaying = false;
-        let repeatMode = 'off'; // 'off', 'all', 'one'
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Initializing VGMEDIA Player...');
-            
-            // Initialize all components
-            initAuth();
-            initPlayer();
-            initLibrary();
-            initVisualizer();
-            
-            // Setup event listeners
-            setupEventListeners();
-            
-            console.log('✅ VGMEDIA Ready!');
-        });
-        
-        // 1. AUTHENTICATION INIT
-        function initAuth() {
-            const user = window.getCurrentUser ? window.getCurrentUser() : null;
-            const loginBtn = document.getElementById('loginBtn');
-            const userMenu = document.getElementById('userMenu');
-            const userName = document.getElementById('userName');
-            const adminNavLink = document.getElementById('adminNavLink');
-            const footerLogin = document.getElementById('footerLogin');
-            const footerRegister = document.getElementById('footerRegister');
-            const footerPremium = document.getElementById('footerPremium');
-            
-            if (user) {
-                // User is logged in
-                loginBtn.style.display = 'none';
-                userMenu.style.display = 'flex';
-                userName.textContent = user.name;
-                
-                // Check if user is admin
-                if (user.type === 'admin') {
-                    adminNavLink.style.display = 'flex';
-                }
-                
-                // Update footer
-                if (footerLogin) {
-                    footerLogin.textContent = 'Xin chào, ' + user.name;
-                    footerLogin.href = '#';
-                    footerLogin.onclick = () => showUserInfo(user);
-                }
-                
-                if (footerRegister) footerRegister.style.display = 'none';
-                
-                if (footerPremium) {
-                    if (user.isPremium || user.type === 'admin') {
-                        footerPremium.innerHTML = '<i class="fas fa-crown"></i> Premium Member';
-                        footerPremium.style.color = '#FFD700';
-                    } else {
-                        footerPremium.innerHTML = '<i class="fas fa-crown"></i> Nâng cấp Premium';
-                    }
-                }
-                
-            } else {
-                // User is not logged in
-                loginBtn.style.display = 'block';
-                userMenu.style.display = 'none';
-                adminNavLink.style.display = 'none';
-            }
-            
-            // Set current year in footer
-            document.getElementById('currentYear').textContent = new Date().getFullYear();
-        }
-        
-        // 2. PLAYER INIT
-        function initPlayer() {
-            const audioPlayer = document.getElementById('audioPlayer');
-            const volumeSlider = document.getElementById('volumeSlider');
-            
-            if (audioPlayer) {
-                audioPlayer.volume = volumeSlider ? volumeSlider.value / 100 : 0.8;
-            }
-            
-            // Load first song if exists
-            const songs = window.getMusicLibrary ? window.getMusicLibrary() : [];
-            if (songs.length > 0) {
-                loadSong(songs[0].id);
-            }
-        }
-        
-        // 3. LIBRARY INIT
-        function initLibrary() {
-            loadMusicLibrary();
-            updateLibraryStats();
-        }
-        
-        // 4. VISUALIZER INIT
-        function initVisualizer() {
-            const canvas = document.getElementById('audioVisualizer');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
-            
-            // Store context for later use
-            window.audioVisualizer = { canvas, ctx };
-        }
-        
-        // 5. EVENT LISTENERS SETUP
-        function setupEventListeners() {
-            // Login button
-            document.getElementById('loginBtn')?.addEventListener('click', () => {
-                window.location.href = './login.html';
-            });
-            
-            // Logout button
-            document.getElementById('logoutBtn')?.addEventListener('click', () => {
-                if (confirm('Bạn có chắc muốn đăng xuất?')) {
-                    if (window.logout) {
-                        window.logout();
-                        location.reload();
-                    }
-                }
-            });
-            
-            // Player controls
-            const playBtn = document.getElementById('playBtn');
-            const pauseBtn = document.getElementById('pauseBtn');
-            const playMainBtn = document.getElementById('playMainBtn');
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            const volumeSlider = document.getElementById('volumeSlider');
-            const repeatBtn = document.getElementById('repeatBtn');
-            const progressBar = document.getElementById('progressBar');
-            const audioPlayer = document.getElementById('audioPlayer');
-            const likeBtn = document.getElementById('likeBtn');
-            const downloadBtn = document.getElementById('downloadBtn');
-            const buyBtn = document.getElementById('buyBtn');
-            
-            // Play buttons
-            if (playBtn) playBtn.addEventListener('click', togglePlayPause);
-            if (playMainBtn) playMainBtn.addEventListener('click', togglePlayPause);
-            if (pauseBtn) pauseBtn.addEventListener('click', pauseCurrentSong);
-            
-            // Navigation buttons
-            if (prevBtn) prevBtn.addEventListener('click', playPreviousSong);
-            if (nextBtn) nextBtn.addEventListener('click', playNextSong);
-            
-            // Volume control
-            if (volumeSlider) {
-                volumeSlider.addEventListener('input', function() {
-                    if (audioPlayer) {
-                        audioPlayer.volume = this.value / 100;
-                        const icon = document.getElementById('volumeIcon');
-                        if (icon) {
-                            if (this.value == 0) {
-                                icon.className = 'fas fa-volume-mute volume-icon';
-                            } else if (this.value < 50) {
-                                icon.className = 'fas fa-volume-down volume-icon';
-                            } else {
-                                icon.className = 'fas fa-volume-up volume-icon';
-                            }
-                        }
-                    }
-                });
-            }
-            
-            // Repeat button
-            if (repeatBtn) {
-                repeatBtn.addEventListener('click', function() {
-                    if (repeatMode === 'off') {
-                        repeatMode = 'all';
-                        this.style.color = '#6C63FF';
-                        this.title = 'Lặp lại tất cả';
-                        showNotification('🔂 Lặp lại tất cả bài hát');
-                    } else if (repeatMode === 'all') {
-                        repeatMode = 'one';
-                        this.style.color = '#FF6584';
-                        this.title = 'Lặp lại một bài';
-                        showNotification('🔁 Lặp lại một bài');
-                    } else {
-                        repeatMode = 'off';
-                        this.style.color = '';
-                        this.title = 'Không lặp lại';
-                        showNotification('⏹️ Không lặp lại');
-                    }
-                });
-            }
-            
-            // Progress bar click
-            if (progressBar && audioPlayer) {
-                progressBar.addEventListener('click', function(e) {
-                    const rect = this.getBoundingClientRect();
-                    const percent = (e.clientX - rect.left) / rect.width;
-                    audioPlayer.currentTime = percent * audioPlayer.duration;
-                });
-            }
-            
-            // Audio player events
-            if (audioPlayer) {
-                audioPlayer.addEventListener('timeupdate', updateProgress);
-                audioPlayer.addEventListener('loadedmetadata', function() {
-                    document.getElementById('totalTime').textContent = formatTime(this.duration);
-                });
-                audioPlayer.addEventListener('play', function() {
-                    document.body.classList.add('playing');
-                    isPlaying = true;
-                    updateVisualizer(true);
-                });
-                audioPlayer.addEventListener('pause', function() {
-                    document.body.classList.remove('playing');
-                    isPlaying = false;
-                    updateVisualizer(false);
-                });
-                audioPlayer.addEventListener('ended', handleSongEnded);
-                audioPlayer.addEventListener('error', function(e) {
-                    console.error('Audio player error:', e);
-                    showNotification('❌ Lỗi phát nhạc. Vui lòng thử lại.', 'error');
-                });
-            }
-            
-            // Like button
-            if (likeBtn) {
-                likeBtn.addEventListener('click', function() {
-                    if (!currentSongId) return;
-                    
-                    this.classList.toggle('liked');
-                    const icon = this.querySelector('i');
-                    if (icon.classList.contains('far')) {
-                        icon.classList.remove('far');
-                        icon.classList.add('fas');
-                        this.style.background = '#FF6584';
-                        showNotification('❤️ Đã thêm vào yêu thích!');
-                    } else {
-                        icon.classList.remove('fas');
-                        icon.classList.add('far');
-                        this.style.background = '';
-                        showNotification('💔 Đã xóa khỏi yêu thích!');
-                    }
-                });
-            }
-            
-            // Download button
-            if (downloadBtn) {
-                downloadBtn.addEventListener('click', function() {
-                    if (!currentSongId) {
-                        showNotification('Vui lòng chọn bài hát để tải', 'error');
-                        return;
-                    }
-                    
-                    const song = window.getSongById ? window.getSongById(currentSongId) : null;
-                    if (!song) return;
-                    
-                    const user = window.getCurrentUser ? window.getCurrentUser() : null;
-                    
-                    // Kiểm tra quyền download
-                    if (song.type === 'premium') {
-                        if (!user) {
-                            showNotification('Vui lòng đăng nhập để tải bài hát premium', 'error');
-                            return;
-                        }
-                        
-                        if (!user.isPremium && !(user.purchasedSongs && user.purchasedSongs.includes(currentSongId))) {
-                            showNotification('Vui lòng mua bài hát premium để tải', 'error');
-                            return;
-                        }
-                    }
-                    
-                    showNotification(`📥 Đang tải xuống: ${song.title}...`);
-                    
-                    // Tạo link download
-                    const link = document.createElement('a');
-                    link.href = song.audioUrl;
-                    link.download = `${song.title} - ${song.artist}.mp3`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                });
-            }
-            
-            // Buy button
-            if (buyBtn) {
-                buyBtn.addEventListener('click', function() {
-                    if (!currentSongId) return;
-                    
-                    const song = window.getSongById ? window.getSongById(currentSongId) : null;
-                    if (!song) return;
-                    
-                    const user = window.getCurrentUser ? window.getCurrentUser() : null;
-                    
-                    if (song.type === 'free') {
-                        // Download free song
-                        showNotification('📥 Đang tải xuống bài hát miễn phí...');
-                        const link = document.createElement('a');
-                        link.href = song.audioUrl;
-                        link.download = `${song.title} - ${song.artist}.mp3`;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    } else {
-                        // Premium song - show purchase modal
-                        if (!user) {
-                            showNotification('Vui lòng đăng nhập để mua bài hát', 'error');
-                            return;
-                        }
-                        
-                        if (user.isPremium) {
-                            showNotification('🎉 Bạn đã là Premium member! Có thể nghe và tải tất cả bài hát.', 'success');
-                            return;
-                        }
-                        
-                        if (user.purchasedSongs && user.purchasedSongs.includes(currentSongId)) {
-                            showNotification('✅ Bạn đã mua bài hát này rồi!', 'success');
-                            return;
-                        }
-                        
-                        showPurchaseModal(song);
-                    }
-                });
-            }
-            
-            // Category filters
-            document.querySelectorAll('.category-filter').forEach(filter => {
-                filter.addEventListener('click', function() {
-                    document.querySelectorAll('.category-filter').forEach(f => f.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    const genre = this.dataset.genre;
-                    filterSongsByGenre(genre);
-                });
-            });
-            
-            // Library filters
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    const filter = this.dataset.filter;
-                    filterSongsByType(filter);
-                });
-            });
-            
-            // Window resize
-            window.addEventListener('resize', function() {
-                const canvas = document.getElementById('audioVisualizer');
-                if (canvas) {
-                    canvas.width = canvas.offsetWidth;
-                    canvas.height = canvas.offsetHeight;
-                }
-                if (isPlaying) {
-                    updateVisualizer(true);
-                }
-            });
-        }
-        
-        // ==================== CORE FUNCTIONS ====================
-        
-        // Load song by ID
-        function loadSong(songId) {
-            currentSongId = songId;
-            
-            const song = window.getSongById ? window.getSongById(songId) : null;
-            if (!song) {
-                console.error('Song not found:', songId);
-                return;
-            }
-            
-            // Update UI
-            document.getElementById('currentTitle').textContent = song.title;
-            document.getElementById('currentArtist').textContent = song.artist;
-            document.getElementById('currentDuration').innerHTML = `<i class="fas fa-clock"></i> ${song.duration}`;
-            document.getElementById('currentGenre').innerHTML = `<i class="fas fa-tag"></i> ${song.genre || 'EDM'}`;
-            document.getElementById('currentBPM').innerHTML = `<i class="fas fa-tachometer-alt"></i> ${song.bpm || '128 BPM'}`;
-            
-            // Calculate file size
-            const fileSize = song.fileSize ? song.fileSize : 'Unknown';
-            document.getElementById('currentSize').innerHTML = `<i class="fas fa-database"></i> ${fileSize}`;
-            
-            const thumbnail = document.getElementById('currentThumbnail');
-            if (thumbnail) {
-                thumbnail.src = song.thumbnail || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f';
-            }
-            
-            document.getElementById('currentDescription').textContent = song.description || 'Bài hát chất lượng cao từ VGMEDIA';
-            
-            // Update badge
-            const badge = document.getElementById('currentBadge');
-            if (badge) {
-                badge.textContent = song.type === 'premium' ? 'PREMIUM' : 'FREE';
-                badge.className = `song-badge ${song.type}`;
-            }
-            
-            // Update buy button
-            const buyBtn = document.getElementById('buyBtn');
-            if (buyBtn) {
-                const user = window.getCurrentUser ? window.getCurrentUser() : null;
-                
-                if (song.type === 'free') {
-                    buyBtn.innerHTML = '<i class="fas fa-download"></i> Tải miễn phí';
-                    buyBtn.style.background = '';
-                } else {
-                    const price = song.price ? song.price.toLocaleString('vi-VN') + 'đ' : '199,000đ';
-                    
-                    if (user) {
-                        if (user.isPremium) {
-                            buyBtn.innerHTML = '<i class="fas fa-crown"></i> Premium Member';
-                            buyBtn.style.background = '#FFD700';
-                            buyBtn.style.color = '#000';
-                            buyBtn.disabled = true;
-                        } else if (user.purchasedSongs && user.purchasedSongs.includes(songId)) {
-                            buyBtn.innerHTML = '<i class="fas fa-check-circle"></i> Đã mua';
-                            buyBtn.style.background = '#4CAF50';
-                            buyBtn.disabled = true;
-                        } else {
-                            buyBtn.innerHTML = `<i class="fas fa-shopping-cart"></i> Mua - ${price}`;
-                            buyBtn.style.background = '';
-                            buyBtn.disabled = false;
-                        }
-                    } else {
-                        buyBtn.innerHTML = `<i class="fas fa-shopping-cart"></i> Mua - ${price}`;
-                        buyBtn.style.background = '';
-                        buyBtn.disabled = false;
-                    }
-                }
-            }
-            
-            // Update audio player
-            const audioPlayer = document.getElementById('audioPlayer');
-            if (audioPlayer) {
-                audioPlayer.src = song.audioUrl;
-                
-                // Check if user can play full song
-                const user = window.getCurrentUser ? window.getCurrentUser() : null;
-                if (song.type === 'premium' && user && !user.isPremium && 
-                    !(user.purchasedSongs && user.purchasedSongs.includes(songId))) {
-                    audioPlayer.dataset.introEnd = '150'; // 2:30 minutes
-                } else {
-                    delete audioPlayer.dataset.introEnd;
-                }
-            }
-            
-            // Update footer
-            document.getElementById('footerCurrentSong').textContent = `${song.title} - ${song.artist}`;
-            
-            // Update active song in library
-            document.querySelectorAll('.song-item').forEach(item => {
-                const itemId = parseInt(item.dataset.id);
-                if (itemId === songId) {
-                    item.classList.add('active');
-                } else {
-                    item.classList.remove('active');
-                }
-            });
-            
-            // Reset progress
-            updateProgress();
-        }
-        
-        // Load music library
-        function loadMusicLibrary() {
-            const songsList = document.getElementById('songsList');
-            if (!songsList) return;
-            
-            const songs = window.getMusicLibrary ? window.getMusicLibrary() : [];
-            const user = window.getCurrentUser ? window.getCurrentUser() : null;
-            
-            if (songs.length === 0) {
-                songsList.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #8A8A8A; grid-column: 1 / -1;">
-                        <i class="fas fa-music" style="font-size: 48px; margin-bottom: 20px; opacity: 0.3;"></i>
-                        <h4>Thư viện nhạc trống</h4>
-                        <p>Admin chưa thêm bài hát nào</p>
-                        <p style="font-size: 0.9rem; margin-top: 10px;">
-                            <i class="fas fa-info-circle"></i> 
-                            Chỉ Admin có quyền upload nhạc
-                        </p>
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '';
-            songs.forEach(song => {
-                const canPlay = song.type === 'free' || 
-                               (user && (user.isPremium || 
-                               (user.purchasedSongs && user.purchasedSongs.includes(song.id))));
-                
-                const priceDisplay = song.type === 'free' ? 
-                    '<span style="color: #4CAF50;"><i class="fas fa-unlock"></i> Miễn phí</span>' :
-                    `<span style="color: #FF6584;">${song.price ? song.price.toLocaleString('vi-VN') + 'đ' : '199,000đ'}</span>`;
-                
-                html += `
-                    <div class="song-item" data-id="${song.id}" onclick="playSelectedSong(${song.id})">
-                        <img src="${song.thumbnail || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f'}" 
-                             alt="${song.title}" 
-                             class="song-item-img">
-                        <div class="song-item-info">
-                            <div class="song-item-title">
-                                ${song.title}
-                                ${!canPlay ? '<span style="margin-left: 8px; font-size: 12px; color: #FF6584;"><i class="fas fa-lock"></i></span>' : ''}
-                            </div>
-                            <div class="song-item-artist">${song.artist}</div>
-                            <div class="song-item-meta">
-                                <span><i class="fas fa-clock"></i> ${song.duration}</span>
-                                <span><i class="fas fa-tag"></i> ${song.genre || 'EDM'}</span>
-                                <span><i class="fas fa-fire"></i> ${song.bpm || '128 BPM'}</span>
-                            </div>
-                        </div>
-                        <div class="song-item-price ${song.type === 'free' ? 'free' : ''}">
-                            ${priceDisplay}
-                        </div>
-                    </div>
-                `;
-            });
-            
-            songsList.innerHTML = html;
-        }
-        
-        // Play selected song
-        window.playSelectedSong = function(songId) {
-            loadSong(songId);
-            playCurrentSong();
-        };
-        
-        // Toggle play/pause
-        function togglePlayPause() {
-            const audioPlayer = document.getElementById('audioPlayer');
-            if (!audioPlayer || !audioPlayer.src) {
-                showNotification('Không có bài hát để phát', 'error');
-                return;
-            }
-            
-            if (isPlaying) {
-                pauseCurrentSong();
-            } else {
-                playCurrentSong();
-            }
-        }
-        
-        // Play current song
-        function playCurrentSong() {
-            const audioPlayer = document.getElementById('audioPlayer');
-            const playBtn = document.getElementById('playBtn');
-            const playMainBtn = document.getElementById('playMainBtn');
-            
-            if (!audioPlayer || !audioPlayer.src) {
-                showNotification('Không có bài hát để phát', 'error');
-                return;
-            }
-            
-            // Kiểm tra quyền nghe (chỉ cho premium songs)
-            const song = window.getSongById ? window.getSongById(currentSongId) : null;
-            const user = window.getCurrentUser ? window.getCurrentUser() : null;
-            
-            if (song && song.type === 'premium') {
-                if (!user) {
-                    showNotification('Vui lòng đăng nhập để nghe bài hát premium', 'error');
-                    return;
-                }
-                
-                if (!user.isPremium && !(user.purchasedSongs && user.purchasedSongs.includes(currentSongId))) {
-                    showNotification('Vui lòng mua bài hát premium để nghe', 'error');
-                    return;
-                }
-            }
-            
-            audioPlayer.play()
-                .then(() => {
-                    if (playBtn) playBtn.innerHTML = '<i class="fas fa-pause"></i> Tạm dừng';
-                    if (playMainBtn) playMainBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                    
-                    showNotification('🎵 Đang phát nhạc...', 'success');
-                })
-                .catch(error => {
-                    console.error('Play error:', error);
-                    showNotification('Không thể phát nhạc. Vui lòng thử lại.', 'error');
-                });
-        }
-        
-        // Pause current song
-        function pauseCurrentSong() {
-            const audioPlayer = document.getElementById('audioPlayer');
-            const playBtn = document.getElementById('playBtn');
-            const playMainBtn = document.getElementById('playMainBtn');
-            
-            if (audioPlayer) {
-                audioPlayer.pause();
-                if (playBtn) playBtn.innerHTML = '<i class="fas fa-play"></i> Phát nhạc';
-                if (playMainBtn) playMainBtn.innerHTML = '<i class="fas fa-play"></i>';
-            }
-        }
-        
-        // Play next song
-        function playNextSong() {
-            const songs = window.getMusicLibrary ? window.getMusicLibrary() : [];
-            if (songs.length === 0) return;
-            
-            const currentId = currentSongId || songs[0].id;
-            const currentIndex = songs.findIndex(s => s.id === currentId);
-            
-            if (currentIndex >= 0 && currentIndex < songs.length - 1) {
-                loadSong(songs[currentIndex + 1].id);
-                playCurrentSong();
-            } else {
-                loadSong(songs[0].id);
-                playCurrentSong();
-            }
-        }
-        
-        // Play previous song
-        function playPreviousSong() {
-            const songs = window.getMusicLibrary ? window.getMusicLibrary() : [];
-            if (songs.length === 0) return;
-            
-            const currentId = currentSongId || songs[0].id;
-            const currentIndex = songs.findIndex(s => s.id === currentId);
-            
-            if (currentIndex > 0) {
-                loadSong(songs[currentIndex - 1].id);
-                playCurrentSong();
-            } else {
-                loadSong(songs[songs.length - 1].id);
-                playCurrentSong();
-            }
-        }
-        
-        // Update progress bar
-        function updateProgress() {
-            const audioPlayer = document.getElementById('audioPlayer');
-            const progress = document.getElementById('songProgress');
-            const currentTimeEl = document.getElementById('currentTime');
-            
-            if (!audioPlayer) return;
-            
-            const currentTime = audioPlayer.currentTime || 0;
-            const duration = audioPlayer.duration || 1;
-            const percent = (currentTime / duration) * 100;
-            
-            if (progress) {
-                progress.style.width = percent + '%';
-            }
-            
-            if (currentTimeEl) {
-                currentTimeEl.textContent = formatTime(currentTime);
-            }
-            
-            // Check intro for premium songs
-            const introEnd = audioPlayer.dataset.introEnd;
-            if (introEnd && currentTime >= parseInt(introEnd)) {
-                audioPlayer.pause();
-                const song = window.getSongById ? window.getSongById(currentSongId) : null;
-                if (song) {
-                    showPurchaseModal(song);
-                }
-            }
-        }
-        
-        // Format time
-        function formatTime(seconds) {
-            if (!seconds || isNaN(seconds)) return '00:00';
-            
-            const hours = Math.floor(seconds / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            const secs = Math.floor(seconds % 60);
-            
-            if (hours > 0) {
-                return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            } else {
-                return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            }
-        }
-        
-        // Update visualizer
-        function updateVisualizer(isPlaying) {
-            if (!isPlaying) {
-                const visualizer = window.audioVisualizer;
-                if (visualizer) {
-                    const { canvas, ctx } = visualizer;
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                }
-                return;
-            }
-            
-            const visualizer = window.audioVisualizer;
-            if (!visualizer) return;
-            
-            const { canvas, ctx } = visualizer;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw visualizer bars
-            const barCount = 128;
-            const barWidth = canvas.width / barCount;
-            const centerY = canvas.height / 2;
-            
-            for (let i = 0; i < barCount; i++) {
-                // Tạo hiệu ứng wave với randomness
-                const time = Date.now() / 1000;
-                const frequency = 0.5 + (i / barCount) * 2;
-                const amplitude = Math.sin(time * frequency + i * 0.1) * 0.5 + 0.5;
-                
-                const height = amplitude * canvas.height * 0.3;
-                const x = i * barWidth;
-                const y = centerY - height / 2;
-                
-                // Create gradient
-                const gradient = ctx.createLinearGradient(x, y, x, y + height);
-                gradient.addColorStop(0, '#6C63FF');
-                gradient.addColorStop(0.5, '#FF6584');
-                gradient.addColorStop(1, '#6C63FF');
-                
-                ctx.fillStyle = gradient;
-                ctx.fillRect(x, y, barWidth - 1, height);
-            }
-            
-            // Update light effects
-            const lightEffects = document.getElementById('lightEffects');
-            if (lightEffects) {
-                const time = Date.now() / 1000;
-                const x = 50 + Math.sin(time * 0.5) * 30;
-                const y = 50 + Math.cos(time * 0.3) * 30;
-                lightEffects.style.setProperty('--x', x + '%');
-                lightEffects.style.setProperty('--y', y + '%');
-            }
-            
-            // Continue animation if playing
-            if (isPlaying) {
-                requestAnimationFrame(() => updateVisualizer(isPlaying));
-            }
-        }
-        
-        // Update library stats
-        function updateLibraryStats() {
-            const songs = window.getMusicLibrary ? window.getMusicLibrary() : [];
-            
-            const totalSongs = songs.length;
-            const freeSongs = songs.filter(s => s.type === 'free').length;
-            const premiumSongs = songs.filter(s => s.type === 'premium').length;
-            
-            // Calculate total duration
-            let totalSeconds = 0;
-            songs.forEach(song => {
-                const duration = song.duration || '0:00';
-                const parts = duration.split(':').map(Number);
-                if (parts.length === 3) {
-                    totalSeconds += parts[0] * 3600 + parts[1] * 60 + parts[2];
-                } else if (parts.length === 2) {
-                    totalSeconds += parts[0] * 60 + parts[1];
-                }
-            });
-            
-            const totalHours = (totalSeconds / 3600).toFixed(1);
-            
-            // Update UI
-            document.getElementById('totalSongs').textContent = totalSongs;
-            document.getElementById('freeSongs').textContent = freeSongs;
-            document.getElementById('premiumSongs').textContent = premiumSongs;
-            document.getElementById('totalDuration').textContent = totalHours + ' giờ';
-        }
-        
-        // Filter songs by genre
-        function filterSongsByGenre(genre) {
-            const songs = window.getMusicLibrary ? window.getMusicLibrary() : [];
-            const songsList = document.getElementById('songsList');
-            
-            if (!songsList) return;
-            
-            let filteredSongs = songs;
-            if (genre !== 'all') {
-                filteredSongs = songs.filter(song => 
-                    song.genre && song.genre.toLowerCase().includes(genre.toLowerCase())
-                );
-            }
-            
-            renderFilteredSongs(filteredSongs);
-        }
-        
-        // Filter songs by type
-        function filterSongsByType(type) {
-            const songs = window.getMusicLibrary ? window.getMusicLibrary() : [];
-            const songsList = document.getElementById('songsList');
-            
-            if (!songsList) return;
-            
-            let filteredSongs = songs;
-            if (type !== 'all') {
-                filteredSongs = songs.filter(song => song.type === type);
-            }
-            
-            renderFilteredSongs(filteredSongs);
-        }
-        
-        // Render filtered songs
-        function renderFilteredSongs(songs) {
-            const songsList = document.getElementById('songsList');
-            const user = window.getCurrentUser ? window.getCurrentUser() : null;
-            
-            if (songs.length === 0) {
-                songsList.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #8A8A8A; grid-column: 1 / -1;">
-                        <i class="fas fa-search" style="font-size: 48px; margin-bottom: 20px; opacity: 0.3;"></i>
-                        <h4>Không tìm thấy bài hát</h4>
-                        <p>Thử bộ lọc khác</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '';
-            songs.forEach(song => {
-                const canPlay = song.type === 'free' || 
-                               (user && (user.isPremium || 
-                               (user.purchasedSongs && user.purchasedSongs.includes(song.id))));
-                
-                const priceDisplay = song.type === 'free' ? 
-                    '<span style="color: #4CAF50;"><i class="fas fa-unlock"></i> Miễn phí</span>' :
-                    `<span style="color: #FF6584;">${song.price ? song.price.toLocaleString('vi-VN') + 'đ' : '199,000đ'}</span>`;
-                
-                html += `
-                    <div class="song-item" data-id="${song.id}" onclick="playSelectedSong(${song.id})">
-                        <img src="${song.thumbnail || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f'}" 
-                             alt="${song.title}" 
-                             class="song-item-img">
-                        <div class="song-item-info">
-                            <div class="song-item-title">
-                                ${song.title}
-                                ${!canPlay ? '<span style="margin-left: 8px; font-size: 12px; color: #FF6584;"><i class="fas fa-lock"></i></span>' : ''}
-                            </div>
-                            <div class="song-item-artist">${song.artist}</div>
-                            <div class="song-item-meta">
-                                <span><i class="fas fa-clock"></i> ${song.duration}</span>
-                                <span><i class="fas fa-tag"></i> ${song.genre || 'EDM'}</span>
-                                <span><i class="fas fa-fire"></i> ${song.bpm || '128 BPM'}</span>
-                            </div>
-                        </div>
-                        <div class="song-item-price ${song.type === 'free' ? 'free' : ''}">
-                            ${priceDisplay}
-                        </div>
-                    </div>
-                `;
-            });
-            
-            songsList.innerHTML = html;
-        }
-        
-        // Handle song ended
-        function handleSongEnded() {
-            if (repeatMode === 'one') {
-                // Repeat one song
-                const audioPlayer = document.getElementById('audioPlayer');
-                if (audioPlayer) {
-                    audioPlayer.currentTime = 0;
-                    audioPlayer.play();
-                }
-            } else if (repeatMode === 'all') {
-                // Play next song
-                playNextSong();
-            }
-            // If repeatMode is 'off', do nothing
-        }
-        
-        // Show purchase modal
-        function showPurchaseModal(song) {
-            const price = song.price ? song.price.toLocaleString('vi-VN') + 'đ' : '199,000đ';
-            
-            const modalHtml = `
-                <div id="purchaseModal" style="
-                    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                    background: rgba(0,0,0,0.9); display: flex; justify-content: center; 
-                    align-items: center; z-index: 9999;">
-                    <div style="background: #1E1E1E; padding: 30px; border-radius: 20px; 
-                         max-width: 500px; width: 90%; border: 2px solid #6C63FF; box-shadow: 0 0 50px rgba(108, 99, 255, 0.5);">
-                        <h2 style="color: #6C63FF; margin-bottom: 20px;">
-                            <i class="fas fa-crown"></i> Mua bài hát Premium
-                        </h2>
-                        <div style="background: rgba(108, 99, 255, 0.1); padding: 20px; 
-                             border-radius: 10px; margin-bottom: 25px;">
-                            <h3 style="margin-top: 0; color: white;">${song.title}</h3>
-                            <p style="color: #B0B0B0; margin-bottom: 15px;">${song.artist} • ${song.duration}</p>
-                            <div style="display: flex; justify-content: space-between; 
-                                 align-items: center; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
-                                <span style="color: #8A8A8A;">Giá:</span>
-                                <span style="font-size: 24px; font-weight: bold; color: #FF6584;">
-                                    ${price}
-                                </span>
-                            </div>
-                        </div>
-                        <div style="background: rgba(76, 175, 80, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 25px;">
-                            <h4 style="color: #4CAF50; margin-top: 0;">
-                                <i class="fas fa-lightbulb"></i> Mẹo tiết kiệm
-                            </h4>
-                            <p style="color: #B0B0B0; font-size: 14px; margin: 5px 0;">
-                                <i class="fas fa-check-circle" style="color: #4CAF50;"></i>
-                                Nâng cấp Premium để nghe tất cả bài hát không giới hạn
-                            </p>
-                            <p style="color: #B0B0B0; font-size: 14px;">
-                                <i class="fas fa-check-circle" style="color: #4CAF50;"></i>
-                                Chỉ 499,000đ/tháng - Tiết kiệm hơn mua lẻ
-                            </p>
-                        </div>
-                        <div style="display: flex; gap: 15px;">
-                            <button onclick="document.getElementById('purchaseModal').remove()" style="
-                                flex: 1; padding: 15px; background: transparent; border: 2px solid #8A8A8A; 
-                                color: #B0B0B0; border-radius: 10px; cursor: pointer; font-weight: 600;
-                                transition: all 0.3s;" onmouseover="this.style.borderColor='#FF6584'; this.style.color='#FF6584'" 
-                                onmouseout="this.style.borderColor='#8A8A8A'; this.style.color='#B0B0B0'">
-                                Để sau
-                            </button>
-                            <button onclick="buySong(${song.id})" style="
-                                flex: 2; padding: 15px; background: linear-gradient(135deg, #6C63FF, #FF6584); 
-                                border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: 600;
-                                transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(108, 99, 255, 0.3)'"
-                                onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
-                                <i class="fas fa-shopping-cart"></i> Mua ngay
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-        }
-        
-        // Buy song function
-        window.buySong = function(songId) {
-            const user = window.getCurrentUser ? window.getCurrentUser() : null;
-            if (!user) {
-                showNotification('Vui lòng đăng nhập để mua bài hát', 'error');
-                document.getElementById('purchaseModal')?.remove();
-                return;
-            }
-            
-            if (user.isPremium) {
-                showNotification('🎉 Bạn đã là Premium member! Có thể nghe và tải tất cả bài hát.', 'success');
-                document.getElementById('purchaseModal')?.remove();
-                return;
-            }
-            
-            // Gọi hàm purchase từ auth-fixed.js
-            if (window.purchaseSong) {
-                const result = window.purchaseSong(songId);
-                if (result && result.success) {
-                    showNotification('🎉 Mua bài hát thành công!', 'success');
-                    document.getElementById('purchaseModal')?.remove();
-                    loadMusicLibrary();
-                    loadSong(songId);
-                } else {
-                    showNotification('❌ Có lỗi xảy ra khi mua bài hát', 'error');
-                }
-            } else {
-                // Fallback
-                const songs = window.getMusicLibrary ? window.getMusicLibrary() : [];
-                const song = songs.find(s => s.id === songId);
-                
-                if (song) {
-                    showNotification(`✅ Đã mua bài hát "${song.title}"!`, 'success');
-                    document.getElementById('purchaseModal')?.remove();
-                    loadMusicLibrary();
-                    loadSong(songId);
-                }
-            }
-        };
-        
-        // Show user info
-        function showUserInfo(user) {
-            const modalHtml = `
-                <div id="userInfoModal" style="
-                    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                    background: rgba(0,0,0,0.9); display: flex; justify-content: center; 
-                    align-items: center; z-index: 9999;">
-                    <div style="background: #1E1E1E; padding: 30px; border-radius: 20px; 
-                         max-width: 400px; width: 90%; border: 2px solid #6C63FF;">
-                        <h2 style="color: #6C63FF; margin-bottom: 20px;">
-                            <i class="fas fa-user-circle"></i> Thông tin tài khoản
-                        </h2>
-                        <div style="margin-bottom: 20px;">
-                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
-                                <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #6C63FF, #FF6584); 
-                                     border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;">
-                                    ${user.name.charAt(0).toUpperCase()}
-                                </div>
-                                <div>
-                                    <h3 style="margin: 0; color: white;">${user.name}</h3>
-                                    <p style="color: #8A8A8A; margin: 5px 0;">${user.email || 'Chưa có email'}</p>
-                                    <span style="background: ${user.type === 'admin' ? '#6C63FF' : user.isPremium ? '#FFD700' : '#4CAF50'}; 
-                                          color: ${user.type === 'admin' || user.isPremium ? '#000' : 'white'}; 
-                                          padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">
-                                        ${user.type === 'admin' ? 'Admin' : user.isPremium ? 'Premium' : 'User'}
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            <div style="background: rgba(108, 99, 255, 0.1); padding: 15px; border-radius: 10px; margin-top: 15px;">
-                                <p style="color: #B0B0B0; margin: 5px 0;">
-                                    <i class="fas fa-calendar"></i> Tham gia: ${new Date(user.createdAt || Date.now()).toLocaleDateString('vi-VN')}
-                                </p>
-                                <p style="color: #B0B0B0; margin: 5px 0;">
-                                    <i class="fas fa-music"></i> Bài hát đã mua: ${user.purchasedSongs ? user.purchasedSongs.length : 0}
-                                </p>
-                            </div>
-                        </div>
-                        <button onclick="document.getElementById('userInfoModal').remove()" style="
-                            width: 100%; padding: 12px; background: #6C63FF; border: none; 
-                            color: white; border-radius: 10px; cursor: pointer; font-weight: 600;">
-                            Đóng
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-        };
-        
-        // Show notification
-        function showNotification(message, type = 'info') {
-            // Remove existing notifications
-            document.querySelectorAll('.notification').forEach(el => el.remove());
-            
-            // Create notification
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.style.cssText = `
-                position: fixed; bottom: 20px; right: 20px; 
-                background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#FF6584' : '#6C63FF'}; 
-                color: white; padding: 15px 25px; border-radius: 10px; 
-                box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 1000; 
-                animation: slideIn 0.3s ease; display: flex; align-items: center; gap: 10px;
-                max-width: 400px;
-            `;
-            
-            const icon = type === 'success' ? 'fa-check-circle' : 
-                        type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
-            
-            notification.innerHTML = `<i class="fas ${icon}"></i><span>${message}</span>`;
-            document.body.appendChild(notification);
-            
-            // Auto remove
-            setTimeout(() => {
-                notification.style.animation = 'slideIn 0.3s ease reverse';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
-        
-        // Add CSS for animations
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes slideOut {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
+        moment.locale('vi');
     </script>
+    <script src="script.js"></script>
 </body>
 </html>
