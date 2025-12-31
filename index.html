@@ -151,6 +151,14 @@
             border-color: var(--primary);
         }
         
+        .upload-section {
+            display: none;
+        }
+        
+        .upload-section.visible {
+            display: block;
+        }
+        
         .upload-area {
             border: 2px dashed var(--primary);
             border-radius: var(--radius-lg);
@@ -218,6 +226,30 @@
             font-weight: bold;
             color: var(--light);
         }
+        
+        .admin-only-tag {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .login-required {
+            text-align: center;
+            padding: 40px;
+            background: rgba(108, 99, 255, 0.1);
+            border-radius: var(--radius-lg);
+            margin: 20px 0;
+        }
+        
+        .login-required i {
+            font-size: 3rem;
+            color: #6C63FF;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -234,8 +266,13 @@
                     <a href="#" class="nav-link active"><i class="fas fa-home"></i> Trang chủ</a>
                     <a href="#library" class="nav-link"><i class="fas fa-music"></i> Thư viện</a>
                     <a href="#categories" class="nav-link"><i class="fas fa-tags"></i> Danh mục</a>
-                    <a href="#upload" class="nav-link"><i class="fas fa-upload"></i> Upload</a>
-                    <a href="./admin.html" class="nav-link" id="adminLink" style="display:none;"><i class="fas fa-cog"></i> Quản lý</a>
+                    <a href="#upload" class="nav-link" id="uploadNavLink" style="display:none;">
+                        <i class="fas fa-upload"></i> Upload
+                        <span class="admin-only-tag">Admin</span>
+                    </a>
+                    <a href="./admin.html" class="nav-link" id="adminNavLink" style="display:none;">
+                        <i class="fas fa-cog"></i> Quản lý
+                    </a>
                 </div>
                 
                 <div class="nav-actions">
@@ -347,29 +384,43 @@
                 </div>
             </div>
             
-            <!-- Upload Section -->
-            <div class="music-library" id="upload">
+            <!-- Upload Section - CHỈ HIỂN THỊ CHO ADMIN -->
+            <div class="music-library upload-section" id="upload">
                 <div class="library-header">
                     <h3><i class="fas fa-upload"></i> Upload nhạc từ máy tính</h3>
+                    <small style="color: #FFD700; font-weight: 500;">
+                        <i class="fas fa-crown"></i> Chỉ Admin mới có quyền upload
+                    </small>
                 </div>
                 
-                <div class="upload-area" id="uploadArea">
-                    <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #6C63FF; margin-bottom: 15px;"></i>
-                    <h4>Kéo thả file MP3 vào đây hoặc click để chọn file</h4>
-                    <p>Hỗ trợ file MP3, WAV, OGG (tối đa 50MB)</p>
-                    <input type="file" id="fileInput" accept="audio/*" style="display: none;">
+                <div class="login-required" id="uploadLoginRequired">
+                    <i class="fas fa-lock"></i>
+                    <h4>Vui lòng đăng nhập với tài khoản Admin</h4>
+                    <p>Chỉ Admin mới có quyền upload bài hát lên hệ thống</p>
+                    <button class="btn-action btn-play" onclick="window.location.href='./login.html'">
+                        <i class="fas fa-sign-in-alt"></i> Đăng nhập Admin
+                    </button>
                 </div>
                 
-                <div class="upload-preview" id="uploadPreview">
-                    <div class="file-preview">
-                        <i class="fas fa-file-audio"></i>
-                        <div>
-                            <div id="fileName">--</div>
-                            <div id="fileInfo" style="font-size: 0.9rem; color: #8A8A8A;">--</div>
+                <div id="uploadAreaWrapper" style="display: none;">
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #6C63FF; margin-bottom: 15px;"></i>
+                        <h4>Kéo thả file nhạc vào đây hoặc click để chọn file</h4>
+                        <p>Hỗ trợ file MP3, WAV, OGG, FLAC, M4A (tối đa 500MB)</p>
+                        <input type="file" id="fileInput" accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac" style="display: none;">
+                    </div>
+                    
+                    <div class="upload-preview" id="uploadPreview">
+                        <div class="file-preview">
+                            <i class="fas fa-file-audio"></i>
+                            <div>
+                                <div id="fileName">--</div>
+                                <div id="fileInfo" style="font-size: 0.9rem; color: #8A8A8A;">--</div>
+                            </div>
+                            <button class="btn-action" id="uploadBtn" style="margin-left: auto;">
+                                <i class="fas fa-upload"></i> Upload
+                            </button>
                         </div>
-                        <button class="btn-action" id="uploadBtn" style="margin-left: auto;">
-                            <i class="fas fa-upload"></i> Upload
-                        </button>
                     </div>
                 </div>
             </div>
@@ -453,7 +504,6 @@
                         <a href="#playerSection">Nghe nhạc</a>
                         <a href="#library">Thư viện</a>
                         <a href="#categories">Thể loại</a>
-                        <a href="#upload">Upload nhạc</a>
                     </div>
                     
                     <div class="footer-column">
@@ -492,13 +542,19 @@
     <script src="./js/file-upload-enhanced.js"></script>
     
     <script>
-        // Main Application Script
+        // Main Application Script - COMPLETE VERSION
         console.log('🎵 VGMEDIA Player Enhanced Loaded');
+        
+        // Global variables
+        let currentSongId = null;
+        let isPlaying = false;
+        let repeatMode = 'off'; // 'off', 'all', 'one'
+        let selectedFile = null;
         
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Initializing VGMEDIA Enhanced Player...');
             
-            // Initialize components
+            // Initialize all components
             initAuth();
             initPlayer();
             initUpload();
@@ -517,9 +573,11 @@
             const loginBtn = document.getElementById('loginBtn');
             const userMenu = document.getElementById('userMenu');
             const userName = document.getElementById('userName');
-            const adminLink = document.getElementById('adminLink');
+            const adminNavLink = document.getElementById('adminNavLink');
+            const uploadNavLink = document.getElementById('uploadNavLink');
             const footerLogin = document.getElementById('footerLogin');
             const footerRegister = document.getElementById('footerRegister');
+            const footerPremium = document.getElementById('footerPremium');
             
             if (user) {
                 // User is logged in
@@ -527,19 +585,44 @@
                 userMenu.style.display = 'flex';
                 userName.textContent = user.name;
                 
+                // Check if user is admin
                 if (user.type === 'admin') {
-                    adminLink.style.display = 'flex';
+                    adminNavLink.style.display = 'flex';
+                    uploadNavLink.style.display = 'flex';
+                    document.querySelector('.upload-section').classList.add('visible');
+                    document.getElementById('uploadLoginRequired').style.display = 'none';
+                    document.getElementById('uploadAreaWrapper').style.display = 'block';
                 }
                 
                 // Update footer
-                if (footerLogin) footerLogin.textContent = 'Xin chào, ' + user.name;
+                if (footerLogin) {
+                    footerLogin.textContent = 'Xin chào, ' + user.name;
+                    footerLogin.href = '#';
+                    footerLogin.onclick = () => showUserInfo(user);
+                }
+                
                 if (footerRegister) footerRegister.style.display = 'none';
+                
+                if (footerPremium) {
+                    if (user.isPremium || user.type === 'admin') {
+                        footerPremium.innerHTML = '<i class="fas fa-crown"></i> Premium Member';
+                        footerPremium.style.color = '#FFD700';
+                    } else {
+                        footerPremium.innerHTML = '<i class="fas fa-crown"></i> Nâng cấp Premium';
+                    }
+                }
                 
             } else {
                 // User is not logged in
                 loginBtn.style.display = 'block';
                 userMenu.style.display = 'none';
-                adminLink.style.display = 'none';
+                adminNavLink.style.display = 'none';
+                uploadNavLink.style.display = 'none';
+                
+                // Show login required for upload section
+                document.querySelector('.upload-section').classList.add('visible');
+                document.getElementById('uploadLoginRequired').style.display = 'block';
+                document.getElementById('uploadAreaWrapper').style.display = 'none';
             }
             
             // Set current year in footer
@@ -562,12 +645,18 @@
             }
         }
         
-        // 3. UPLOAD INIT
+        // 3. UPLOAD INIT - CHỈ CHO ADMIN
         function initUpload() {
             const uploadArea = document.getElementById('uploadArea');
             const fileInput = document.getElementById('fileInput');
             const uploadPreview = document.getElementById('uploadPreview');
             const uploadBtn = document.getElementById('uploadBtn');
+            
+            // Kiểm tra quyền admin
+            const user = window.getCurrentUser ? window.getCurrentUser() : null;
+            if (!user || user.type !== 'admin') {
+                return; // Không init upload cho user thường
+            }
             
             if (!uploadArea || !fileInput) return;
             
@@ -639,9 +728,11 @@
             
             // Logout button
             document.getElementById('logoutBtn')?.addEventListener('click', () => {
-                if (window.logout) {
-                    window.logout();
-                    location.reload();
+                if (confirm('Bạn có chắc muốn đăng xuất?')) {
+                    if (window.logout) {
+                        window.logout();
+                        location.reload();
+                    }
                 }
             });
             
@@ -655,10 +746,13 @@
             const repeatBtn = document.getElementById('repeatBtn');
             const progressBar = document.getElementById('progressBar');
             const audioPlayer = document.getElementById('audioPlayer');
+            const likeBtn = document.getElementById('likeBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const buyBtn = document.getElementById('buyBtn');
             
             // Play buttons
-            if (playBtn) playBtn.addEventListener('click', playCurrentSong);
-            if (playMainBtn) playMainBtn.addEventListener('click', playCurrentSong);
+            if (playBtn) playBtn.addEventListener('click', togglePlayPause);
+            if (playMainBtn) playMainBtn.addEventListener('click', togglePlayPause);
             if (pauseBtn) pauseBtn.addEventListener('click', pauseCurrentSong);
             
             // Navigation buttons
@@ -686,22 +780,23 @@
             
             // Repeat button
             if (repeatBtn) {
-                let repeatMode = 'off';
                 repeatBtn.addEventListener('click', function() {
                     if (repeatMode === 'off') {
                         repeatMode = 'all';
                         this.style.color = '#6C63FF';
                         this.title = 'Lặp lại tất cả';
+                        showNotification('🔂 Lặp lại tất cả bài hát');
                     } else if (repeatMode === 'all') {
                         repeatMode = 'one';
                         this.style.color = '#FF6584';
                         this.title = 'Lặp lại một bài';
+                        showNotification('🔁 Lặp lại một bài');
                     } else {
                         repeatMode = 'off';
                         this.style.color = '';
                         this.title = 'Không lặp lại';
+                        showNotification('⏹️ Không lặp lại');
                     }
-                    window.repeatMode = repeatMode;
                 });
             }
             
@@ -722,13 +817,119 @@
                 });
                 audioPlayer.addEventListener('play', function() {
                     document.body.classList.add('playing');
+                    isPlaying = true;
                     updateVisualizer(true);
                 });
                 audioPlayer.addEventListener('pause', function() {
                     document.body.classList.remove('playing');
+                    isPlaying = false;
                     updateVisualizer(false);
                 });
                 audioPlayer.addEventListener('ended', handleSongEnded);
+                audioPlayer.addEventListener('error', function(e) {
+                    console.error('Audio player error:', e);
+                    showNotification('❌ Lỗi phát nhạc. Vui lòng thử lại.', 'error');
+                });
+            }
+            
+            // Like button
+            if (likeBtn) {
+                likeBtn.addEventListener('click', function() {
+                    if (!currentSongId) return;
+                    
+                    this.classList.toggle('liked');
+                    const icon = this.querySelector('i');
+                    if (icon.classList.contains('far')) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                        this.style.background = '#FF6584';
+                        showNotification('❤️ Đã thêm vào yêu thích!');
+                    } else {
+                        icon.classList.remove('fas');
+                        icon.classList.add('far');
+                        this.style.background = '';
+                        showNotification('💔 Đã xóa khỏi yêu thích!');
+                    }
+                });
+            }
+            
+            // Download button
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', function() {
+                    if (!currentSongId) {
+                        showNotification('Vui lòng chọn bài hát để tải', 'error');
+                        return;
+                    }
+                    
+                    const song = window.getSongById ? window.getSongById(currentSongId) : null;
+                    if (!song) return;
+                    
+                    const user = window.getCurrentUser ? window.getCurrentUser() : null;
+                    
+                    // Kiểm tra quyền download
+                    if (song.type === 'premium') {
+                        if (!user) {
+                            showNotification('Vui lòng đăng nhập để tải bài hát premium', 'error');
+                            return;
+                        }
+                        
+                        if (!user.isPremium && !(user.purchasedSongs && user.purchasedSongs.includes(currentSongId))) {
+                            showNotification('Vui lòng mua bài hát premium để tải', 'error');
+                            return;
+                        }
+                    }
+                    
+                    showNotification(`📥 Đang tải xuống: ${song.title}...`);
+                    
+                    // Tạo link download
+                    const link = document.createElement('a');
+                    link.href = song.audioUrl;
+                    link.download = `${song.title} - ${song.artist}.mp3`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+            }
+            
+            // Buy button
+            if (buyBtn) {
+                buyBtn.addEventListener('click', function() {
+                    if (!currentSongId) return;
+                    
+                    const song = window.getSongById ? window.getSongById(currentSongId) : null;
+                    if (!song) return;
+                    
+                    const user = window.getCurrentUser ? window.getCurrentUser() : null;
+                    
+                    if (song.type === 'free') {
+                        // Download free song
+                        showNotification('📥 Đang tải xuống bài hát miễn phí...');
+                        const link = document.createElement('a');
+                        link.href = song.audioUrl;
+                        link.download = `${song.title} - ${song.artist}.mp3`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    } else {
+                        // Premium song - show purchase modal
+                        if (!user) {
+                            showNotification('Vui lòng đăng nhập để mua bài hát', 'error');
+                            return;
+                        }
+                        
+                        if (user.isPremium) {
+                            showNotification('🎉 Bạn đã là Premium member! Có thể nghe và tải tất cả bài hát.', 'success');
+                            return;
+                        }
+                        
+                        if (user.purchasedSongs && user.purchasedSongs.includes(currentSongId)) {
+                            showNotification('✅ Bạn đã mua bài hát này rồi!', 'success');
+                            return;
+                        }
+                        
+                        showPurchaseModal(song);
+                    }
+                });
             }
             
             // Category filters
@@ -753,51 +954,16 @@
                 });
             });
             
-            // Like button
-            document.getElementById('likeBtn')?.addEventListener('click', function() {
-                this.classList.toggle('liked');
-                const icon = this.querySelector('i');
-                if (icon.classList.contains('far')) {
-                    icon.classList.remove('far');
-                    icon.classList.add('fas');
-                    this.style.background = '#FF6584';
-                    showNotification('Đã thêm vào yêu thích!');
-                } else {
-                    icon.classList.remove('fas');
-                    icon.classList.add('far');
-                    this.style.background = '';
-                    showNotification('Đã xóa khỏi yêu thích!');
+            // Window resize
+            window.addEventListener('resize', function() {
+                const canvas = document.getElementById('audioVisualizer');
+                if (canvas) {
+                    canvas.width = canvas.offsetWidth;
+                    canvas.height = canvas.offsetHeight;
                 }
-            });
-            
-            // Buy button
-            document.getElementById('buyBtn')?.addEventListener('click', function() {
-                const songId = window.currentSongId;
-                if (!songId) return;
-                
-                const song = window.getSongById ? window.getSongById(songId) : null;
-                if (!song) return;
-                
-                if (song.type === 'free') {
-                    // Download free song
-                    showNotification('Đang tải xuống bài hát miễn phí...');
-                    window.open(song.audioUrl, '_blank');
-                } else {
-                    // Show purchase modal
-                    showPurchaseModal(song);
+                if (isPlaying) {
+                    updateVisualizer(true);
                 }
-            });
-            
-            // Download button
-            document.getElementById('downloadBtn')?.addEventListener('click', function() {
-                const songId = window.currentSongId;
-                if (!songId) return;
-                
-                const song = window.getSongById ? window.getSongById(songId) : null;
-                if (!song) return;
-                
-                showNotification(`Đang tải xuống: ${song.title}...`);
-                window.open(song.audioUrl, '_blank');
             });
         }
         
@@ -805,7 +971,7 @@
         
         // Load song by ID
         function loadSong(songId) {
-            window.currentSongId = songId;
+            currentSongId = songId;
             
             const song = window.getSongById ? window.getSongById(songId) : null;
             if (!song) {
@@ -819,6 +985,10 @@
             document.getElementById('currentDuration').innerHTML = `<i class="fas fa-clock"></i> ${song.duration}`;
             document.getElementById('currentGenre').innerHTML = `<i class="fas fa-tag"></i> ${song.genre || 'EDM'}`;
             document.getElementById('currentBPM').innerHTML = `<i class="fas fa-tachometer-alt"></i> ${song.bpm || '128 BPM'}`;
+            
+            // Calculate file size
+            const fileSize = song.fileSize ? song.fileSize : 'Unknown';
+            document.getElementById('currentSize').innerHTML = `<i class="fas fa-database"></i> ${fileSize}`;
             
             const thumbnail = document.getElementById('currentThumbnail');
             if (thumbnail) {
@@ -837,13 +1007,34 @@
             // Update buy button
             const buyBtn = document.getElementById('buyBtn');
             if (buyBtn) {
+                const user = window.getCurrentUser ? window.getCurrentUser() : null;
+                
                 if (song.type === 'free') {
                     buyBtn.innerHTML = '<i class="fas fa-download"></i> Tải miễn phí';
                     buyBtn.style.background = '';
                 } else {
                     const price = song.price ? song.price.toLocaleString('vi-VN') + 'đ' : '199,000đ';
-                    buyBtn.innerHTML = `<i class="fas fa-shopping-cart"></i> Mua - ${price}`;
-                    buyBtn.style.background = '';
+                    
+                    if (user) {
+                        if (user.isPremium) {
+                            buyBtn.innerHTML = '<i class="fas fa-crown"></i> Premium Member';
+                            buyBtn.style.background = '#FFD700';
+                            buyBtn.style.color = '#000';
+                            buyBtn.disabled = true;
+                        } else if (user.purchasedSongs && user.purchasedSongs.includes(songId)) {
+                            buyBtn.innerHTML = '<i class="fas fa-check-circle"></i> Đã mua';
+                            buyBtn.style.background = '#4CAF50';
+                            buyBtn.disabled = true;
+                        } else {
+                            buyBtn.innerHTML = `<i class="fas fa-shopping-cart"></i> Mua - ${price}`;
+                            buyBtn.style.background = '';
+                            buyBtn.disabled = false;
+                        }
+                    } else {
+                        buyBtn.innerHTML = `<i class="fas fa-shopping-cart"></i> Mua - ${price}`;
+                        buyBtn.style.background = '';
+                        buyBtn.disabled = false;
+                    }
                 }
             }
             
@@ -854,7 +1045,8 @@
                 
                 // Check if user can play full song
                 const user = window.getCurrentUser ? window.getCurrentUser() : null;
-                if (song.type === 'premium' && user && !user.isPremium && !user.purchasedSongs.includes(songId)) {
+                if (song.type === 'premium' && user && !user.isPremium && 
+                    !(user.purchasedSongs && user.purchasedSongs.includes(songId))) {
                     audioPlayer.dataset.introEnd = '150'; // 2:30 minutes
                 } else {
                     delete audioPlayer.dataset.introEnd;
@@ -891,10 +1083,7 @@
                     <div style="text-align: center; padding: 40px; color: #8A8A8A; grid-column: 1 / -1;">
                         <i class="fas fa-music" style="font-size: 48px; margin-bottom: 20px; opacity: 0.3;"></i>
                         <h4>Thư viện nhạc trống</h4>
-                        <p>Hãy thêm bài hát đầu tiên từ trang admin!</p>
-                        <button onclick="goToAdmin()" class="btn-action" style="margin-top: 20px;">
-                            <i class="fas fa-cog"></i> Đến trang quản lý
-                        </button>
+                        <p>Hãy đăng nhập Admin và thêm bài hát đầu tiên!</p>
                     </div>
                 `;
                 return;
@@ -903,7 +1092,8 @@
             let html = '';
             songs.forEach(song => {
                 const canPlay = song.type === 'free' || 
-                               (user && (user.isPremium || user.purchasedSongs.includes(song.id)));
+                               (user && (user.isPremium || 
+                               (user.purchasedSongs && user.purchasedSongs.includes(song.id))));
                 
                 const priceDisplay = song.type === 'free' ? 
                     '<span style="color: #4CAF50;"><i class="fas fa-unlock"></i> Miễn phí</span>' :
@@ -942,6 +1132,21 @@
             playCurrentSong();
         };
         
+        // Toggle play/pause
+        function togglePlayPause() {
+            const audioPlayer = document.getElementById('audioPlayer');
+            if (!audioPlayer || !audioPlayer.src) {
+                showNotification('Không có bài hát để phát', 'error');
+                return;
+            }
+            
+            if (isPlaying) {
+                pauseCurrentSong();
+            } else {
+                playCurrentSong();
+            }
+        }
+        
         // Play current song
         function playCurrentSong() {
             const audioPlayer = document.getElementById('audioPlayer');
@@ -953,6 +1158,22 @@
                 return;
             }
             
+            // Kiểm tra quyền nghe (chỉ cho premium songs)
+            const song = window.getSongById ? window.getSongById(currentSongId) : null;
+            const user = window.getCurrentUser ? window.getCurrentUser() : null;
+            
+            if (song && song.type === 'premium') {
+                if (!user) {
+                    showNotification('Vui lòng đăng nhập để nghe bài hát premium', 'error');
+                    return;
+                }
+                
+                if (!user.isPremium && !(user.purchasedSongs && user.purchasedSongs.includes(currentSongId))) {
+                    showNotification('Vui lòng mua bài hát premium để nghe', 'error');
+                    return;
+                }
+            }
+            
             audioPlayer.play()
                 .then(() => {
                     if (playBtn) playBtn.innerHTML = '<i class="fas fa-pause"></i> Tạm dừng';
@@ -962,7 +1183,7 @@
                 })
                 .catch(error => {
                     console.error('Play error:', error);
-                    showNotification('Không thể phát nhạc', 'error');
+                    showNotification('Không thể phát nhạc. Vui lòng thử lại.', 'error');
                 });
         }
         
@@ -984,7 +1205,7 @@
             const songs = window.getMusicLibrary ? window.getMusicLibrary() : [];
             if (songs.length === 0) return;
             
-            const currentId = window.currentSongId || songs[0].id;
+            const currentId = currentSongId || songs[0].id;
             const currentIndex = songs.findIndex(s => s.id === currentId);
             
             if (currentIndex >= 0 && currentIndex < songs.length - 1) {
@@ -1001,7 +1222,7 @@
             const songs = window.getMusicLibrary ? window.getMusicLibrary() : [];
             if (songs.length === 0) return;
             
-            const currentId = window.currentSongId || songs[0].id;
+            const currentId = currentSongId || songs[0].id;
             const currentIndex = songs.findIndex(s => s.id === currentId);
             
             if (currentIndex > 0) {
@@ -1037,7 +1258,7 @@
             const introEnd = audioPlayer.dataset.introEnd;
             if (introEnd && currentTime >= parseInt(introEnd)) {
                 audioPlayer.pause();
-                const song = window.getSongById ? window.getSongById(window.currentSongId) : null;
+                const song = window.getSongById ? window.getSongById(currentSongId) : null;
                 if (song) {
                     showPurchaseModal(song);
                 }
@@ -1048,14 +1269,27 @@
         function formatTime(seconds) {
             if (!seconds || isNaN(seconds)) return '00:00';
             
-            const mins = Math.floor(seconds / 60);
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
             const secs = Math.floor(seconds % 60);
-            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            if (hours > 0) {
+                return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            } else {
+                return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
         }
         
         // Update visualizer
         function updateVisualizer(isPlaying) {
-            if (!isPlaying) return;
+            if (!isPlaying) {
+                const visualizer = window.audioVisualizer;
+                if (visualizer) {
+                    const { canvas, ctx } = visualizer;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+                return;
+            }
             
             const visualizer = window.audioVisualizer;
             if (!visualizer) return;
@@ -1066,14 +1300,20 @@
             // Draw visualizer bars
             const barCount = 128;
             const barWidth = canvas.width / barCount;
+            const centerY = canvas.height / 2;
             
             for (let i = 0; i < barCount; i++) {
-                const height = Math.random() * canvas.height * 0.6 + 10;
+                // Tạo hiệu ứng wave với randomness
+                const time = Date.now() / 1000;
+                const frequency = 0.5 + (i / barCount) * 2;
+                const amplitude = Math.sin(time * frequency + i * 0.1) * 0.5 + 0.5;
+                
+                const height = amplitude * canvas.height * 0.3;
                 const x = i * barWidth;
-                const y = canvas.height - height;
+                const y = centerY - height / 2;
                 
                 // Create gradient
-                const gradient = ctx.createLinearGradient(x, y, x, canvas.height);
+                const gradient = ctx.createLinearGradient(x, y, x, y + height);
                 gradient.addColorStop(0, '#6C63FF');
                 gradient.addColorStop(0.5, '#FF6584');
                 gradient.addColorStop(1, '#6C63FF');
@@ -1085,8 +1325,9 @@
             // Update light effects
             const lightEffects = document.getElementById('lightEffects');
             if (lightEffects) {
-                const x = Math.random() * 100;
-                const y = Math.random() * 100;
+                const time = Date.now() / 1000;
+                const x = 50 + Math.sin(time * 0.5) * 30;
+                const y = 50 + Math.cos(time * 0.3) * 30;
                 lightEffects.style.setProperty('--x', x + '%');
                 lightEffects.style.setProperty('--y', y + '%');
             }
@@ -1097,9 +1338,16 @@
             }
         }
         
-        // Handle file selection
+        // Handle file selection for upload
         function handleFileSelect(file) {
             if (!file) return;
+            
+            // Kiểm tra quyền admin
+            const user = window.getCurrentUser ? window.getCurrentUser() : null;
+            if (!user || user.type !== 'admin') {
+                showNotification('❌ Chỉ Admin mới có quyền upload bài hát!', 'error');
+                return;
+            }
             
             const fileName = document.getElementById('fileName');
             const fileInfo = document.getElementById('fileInfo');
@@ -1108,18 +1356,26 @@
             if (fileName) fileName.textContent = file.name;
             if (fileInfo) {
                 const size = (file.size / (1024 * 1024)).toFixed(2);
-                fileInfo.textContent = `${file.type} • ${size} MB`;
+                const type = file.type || 'audio/mpeg';
+                fileInfo.textContent = `${type} • ${size} MB`;
             }
             
             if (uploadPreview) uploadPreview.classList.add('active');
             
             // Store file for upload
-            window.selectedFile = file;
+            selectedFile = file;
         }
         
-        // Upload file
+        // Upload file - CHỈ CHO ADMIN
         async function uploadFile() {
-            const file = window.selectedFile;
+            // Kiểm tra quyền admin
+            const user = window.getCurrentUser ? window.getCurrentUser() : null;
+            if (!user || user.type !== 'admin') {
+                showNotification('❌ Chỉ Admin mới có quyền upload bài hát!', 'error');
+                return;
+            }
+            
+            const file = selectedFile;
             if (!file) {
                 showNotification('Vui lòng chọn file trước khi upload', 'error');
                 return;
@@ -1142,7 +1398,7 @@
                 const result = await uploader.uploadFileToLocalStorage(file);
                 
                 if (result.success) {
-                    showNotification(`✅ Upload thành công: ${file.name}`, 'success');
+                    showNotification(`✅ Upload thành công: ${file.name} (${result.fileSize})`, 'success');
                     
                     // Get metadata
                     const metadata = await uploader.getAudioMetadata(file);
@@ -1154,15 +1410,18 @@
                     const newSong = {
                         id: newId,
                         title: uploader.extractTitleFromFileName(file.name),
-                        artist: 'Upload từ máy',
+                        artist: 'Upload từ Admin',
                         duration: metadata.duration,
                         genre: 'EDM',
                         bpm: '128 BPM',
-                        price: 0,
+                        price: 0, // Mặc định miễn phí
                         type: 'free',
                         thumbnail: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f',
                         audioUrl: result.dataUrl,
-                        description: 'Bài hát được upload từ máy tính'
+                        description: `Bài hát được upload bởi Admin ${user.name}`,
+                        fileSize: result.fileSize,
+                        uploadedBy: user.username,
+                        uploadedAt: new Date().toISOString()
                     };
                     
                     songs.push(newSong);
@@ -1171,7 +1430,7 @@
                     // Reset form
                     document.getElementById('uploadPreview').classList.remove('active');
                     document.getElementById('fileInput').value = '';
-                    delete window.selectedFile;
+                    selectedFile = null;
                     
                     // Reload library
                     loadMusicLibrary();
@@ -1271,7 +1530,8 @@
             let html = '';
             songs.forEach(song => {
                 const canPlay = song.type === 'free' || 
-                               (user && (user.isPremium || user.purchasedSongs.includes(song.id)));
+                               (user && (user.isPremium || 
+                               (user.purchasedSongs && user.purchasedSongs.includes(song.id))));
                 
                 const priceDisplay = song.type === 'free' ? 
                     '<span style="color: #4CAF50;"><i class="fas fa-unlock"></i> Miễn phí</span>' :
@@ -1306,14 +1566,14 @@
         
         // Handle song ended
         function handleSongEnded() {
-            if (window.repeatMode === 'one') {
+            if (repeatMode === 'one') {
                 // Repeat one song
                 const audioPlayer = document.getElementById('audioPlayer');
                 if (audioPlayer) {
                     audioPlayer.currentTime = 0;
                     audioPlayer.play();
                 }
-            } else if (window.repeatMode === 'all') {
+            } else if (repeatMode === 'all') {
                 // Play next song
                 playNextSong();
             }
@@ -1327,10 +1587,10 @@
             const modalHtml = `
                 <div id="purchaseModal" style="
                     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                    background: rgba(0,0,0,0.8); display: flex; justify-content: center; 
+                    background: rgba(0,0,0,0.9); display: flex; justify-content: center; 
                     align-items: center; z-index: 9999;">
                     <div style="background: #1E1E1E; padding: 30px; border-radius: 20px; 
-                         max-width: 500px; width: 90%; border: 2px solid #6C63FF;">
+                         max-width: 500px; width: 90%; border: 2px solid #6C63FF; box-shadow: 0 0 50px rgba(108, 99, 255, 0.5);">
                         <h2 style="color: #6C63FF; margin-bottom: 20px;">
                             <i class="fas fa-crown"></i> Mua bài hát Premium
                         </h2>
@@ -1346,15 +1606,32 @@
                                 </span>
                             </div>
                         </div>
+                        <div style="background: rgba(76, 175, 80, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 25px;">
+                            <h4 style="color: #4CAF50; margin-top: 0;">
+                                <i class="fas fa-lightbulb"></i> Mẹo tiết kiệm
+                            </h4>
+                            <p style="color: #B0B0B0; font-size: 14px; margin: 5px 0;">
+                                <i class="fas fa-check-circle" style="color: #4CAF50;"></i>
+                                Nâng cấp Premium để nghe tất cả bài hát không giới hạn
+                            </p>
+                            <p style="color: #B0B0B0; font-size: 14px;">
+                                <i class="fas fa-check-circle" style="color: #4CAF50;"></i>
+                                Chỉ 499,000đ/tháng - Tiết kiệm hơn mua lẻ
+                            </p>
+                        </div>
                         <div style="display: flex; gap: 15px;">
                             <button onclick="document.getElementById('purchaseModal').remove()" style="
                                 flex: 1; padding: 15px; background: transparent; border: 2px solid #8A8A8A; 
-                                color: #B0B0B0; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                                color: #B0B0B0; border-radius: 10px; cursor: pointer; font-weight: 600;
+                                transition: all 0.3s;" onmouseover="this.style.borderColor='#FF6584'; this.style.color='#FF6584'" 
+                                onmouseout="this.style.borderColor='#8A8A8A'; this.style.color='#B0B0B0'">
                                 Để sau
                             </button>
                             <button onclick="buySong(${song.id})" style="
                                 flex: 2; padding: 15px; background: linear-gradient(135deg, #6C63FF, #FF6584); 
-                                border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                                border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: 600;
+                                transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(108, 99, 255, 0.3)'"
+                                onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
                                 <i class="fas fa-shopping-cart"></i> Mua ngay
                             </button>
                         </div>
@@ -1374,10 +1651,30 @@
                 return;
             }
             
+            if (user.isPremium) {
+                showNotification('🎉 Bạn đã là Premium member! Có thể nghe và tải tất cả bài hát.', 'success');
+                document.getElementById('purchaseModal')?.remove();
+                return;
+            }
+            
+            // Gọi hàm purchase từ auth-fixed.js
             if (window.purchaseSong) {
                 const result = window.purchaseSong(songId);
-                if (result.success) {
+                if (result && result.success) {
                     showNotification('🎉 Mua bài hát thành công!', 'success');
+                    document.getElementById('purchaseModal')?.remove();
+                    loadMusicLibrary();
+                    loadSong(songId);
+                } else {
+                    showNotification('❌ Có lỗi xảy ra khi mua bài hát', 'error');
+                }
+            } else {
+                // Fallback
+                const songs = window.getMusicLibrary ? window.getMusicLibrary() : [];
+                const song = songs.find(s => s.id === songId);
+                
+                if (song) {
+                    showNotification(`✅ Đã mua bài hát "${song.title}"!`, 'success');
                     document.getElementById('purchaseModal')?.remove();
                     loadMusicLibrary();
                     loadSong(songId);
@@ -1385,9 +1682,54 @@
             }
         };
         
-        // Go to admin
-        window.goToAdmin = function() {
-            window.location.href = './admin.html';
+        // Show user info
+        function showUserInfo(user) {
+            const modalHtml = `
+                <div id="userInfoModal" style="
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                    background: rgba(0,0,0,0.9); display: flex; justify-content: center; 
+                    align-items: center; z-index: 9999;">
+                    <div style="background: #1E1E1E; padding: 30px; border-radius: 20px; 
+                         max-width: 400px; width: 90%; border: 2px solid #6C63FF;">
+                        <h2 style="color: #6C63FF; margin-bottom: 20px;">
+                            <i class="fas fa-user-circle"></i> Thông tin tài khoản
+                        </h2>
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                                <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #6C63FF, #FF6584); 
+                                     border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                                    ${user.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <h3 style="margin: 0; color: white;">${user.name}</h3>
+                                    <p style="color: #8A8A8A; margin: 5px 0;">${user.email || 'Chưa có email'}</p>
+                                    <span style="background: ${user.type === 'admin' ? '#6C63FF' : user.isPremium ? '#FFD700' : '#4CAF50'}; 
+                                          color: ${user.type === 'admin' || user.isPremium ? '#000' : 'white'}; 
+                                          padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">
+                                        ${user.type === 'admin' ? 'Admin' : user.isPremium ? 'Premium' : 'User'}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div style="background: rgba(108, 99, 255, 0.1); padding: 15px; border-radius: 10px; margin-top: 15px;">
+                                <p style="color: #B0B0B0; margin: 5px 0;">
+                                    <i class="fas fa-calendar"></i> Tham gia: ${new Date(user.createdAt || Date.now()).toLocaleDateString('vi-VN')}
+                                </p>
+                                <p style="color: #B0B0B0; margin: 5px 0;">
+                                    <i class="fas fa-music"></i> Bài hát đã mua: ${user.purchasedSongs ? user.purchasedSongs.length : 0}
+                                </p>
+                            </div>
+                        </div>
+                        <button onclick="document.getElementById('userInfoModal').remove()" style="
+                            width: 100%; padding: 12px; background: #6C63FF; border: none; 
+                            color: white; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                            Đóng
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
         };
         
         // Show notification
@@ -1404,6 +1746,7 @@
                 color: white; padding: 15px 25px; border-radius: 10px; 
                 box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 1000; 
                 animation: slideIn 0.3s ease; display: flex; align-items: center; gap: 10px;
+                max-width: 400px;
             `;
             
             const icon = type === 'success' ? 'fa-check-circle' : 
@@ -1418,6 +1761,20 @@
                 setTimeout(() => notification.remove(), 300);
             }, 3000);
         }
+        
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
