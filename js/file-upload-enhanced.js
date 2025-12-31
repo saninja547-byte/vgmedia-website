@@ -1,9 +1,18 @@
-// file-upload-enhanced.js - Upload file MP3 thật sự
+// file-upload-enhanced.js - UPDATED VERSION
 class FileUploaderEnhanced {
     constructor() {
         console.log('🎵 File Uploader Enhanced Initialized');
-        this.maxFileSize = 50 * 1024 * 1024; // 50MB
-        this.allowedAudioTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/m4a'];
+        this.maxFileSize = 500 * 1024 * 1024; // TĂNG LÊN 500MB (cho nhạc 3+ giờ)
+        this.allowedAudioTypes = [
+            'audio/mpeg', 
+            'audio/mp3', 
+            'audio/wav', 
+            'audio/ogg', 
+            'audio/m4a',
+            'audio/flac',
+            'audio/aac',
+            'audio/x-m4a'
+        ];
         this.allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     }
     
@@ -12,8 +21,11 @@ class FileUploaderEnhanced {
         return new Promise((resolve) => {
             const input = document.createElement('input');
             input.type = 'file';
-            input.accept = type === 'audio' ? 'audio/*' : 'image/*';
+            input.accept = type === 'audio' ? 'audio/*,.mp3,.wav,.ogg,.m4a,.flac' : 'image/*';
             input.multiple = false;
+            
+            // Cho phép file lớn
+            input.removeAttribute('multiple');
             
             input.onchange = (e) => {
                 const file = e.target.files[0];
@@ -28,30 +40,56 @@ class FileUploaderEnhanced {
         });
     }
     
-    // Upload file và lưu dưới dạng Data URL (local storage)
-    uploadFileToLocalStorage(file) {
+    // Upload file - CẢI THIỆN CHO FILE LỚN
+    async uploadFileToLocalStorage(file) {
         return new Promise((resolve, reject) => {
             if (!file) {
                 reject(new Error('Không có file'));
                 return;
             }
             
-            // Kiểm tra kích thước
+            console.log('📁 File info:', {
+                name: file.name,
+                size: this.formatFileSize(file.size),
+                type: file.type
+            });
+            
+            // Kiểm tra kích thước - ĐÃ NÂNG LÊN 500MB
             if (file.size > this.maxFileSize) {
                 reject(new Error(`File quá lớn (tối đa ${this.maxFileSize / 1024 / 1024}MB)`));
                 return;
             }
             
             // Kiểm tra loại file
-            const isAudio = this.allowedAudioTypes.includes(file.type);
-            const isImage = this.allowedImageTypes.includes(file.type);
+            const isAudio = this.allowedAudioTypes.includes(file.type.toLowerCase());
+            const isImage = this.allowedImageTypes.includes(file.type.toLowerCase());
             
             if (!isAudio && !isImage) {
-                reject(new Error('Chỉ hỗ trợ file audio (MP3, WAV, OGG) hoặc ảnh (JPG, PNG)'));
-                return;
+                // Fallback: kiểm tra extension
+                const ext = file.name.toLowerCase().split('.').pop();
+                const audioExtensions = ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac'];
+                
+                if (audioExtensions.includes(ext)) {
+                    console.log('✅ File có extension audio hợp lệ:', ext);
+                    // Tiếp tục xử lý
+                } else {
+                    reject(new Error(`Không hỗ trợ file type: ${file.type}. Chỉ hỗ trợ audio (MP3, WAV, OGG, FLAC, M4A) hoặc ảnh (JPG, PNG)`));
+                    return;
+                }
             }
             
             const reader = new FileReader();
+            
+            reader.onloadstart = () => {
+                console.log('🔄 Bắt đầu đọc file...');
+            };
+            
+            reader.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    console.log(`📊 Đang đọc: ${percent}%`);
+                }
+            };
             
             reader.onload = (e) => {
                 const fileData = {
@@ -63,70 +101,74 @@ class FileUploaderEnhanced {
                     uploadedAt: new Date().toISOString()
                 };
                 
-                // Lưu vào localStorage
-                const storageKey = `vgmedia_uploads_${Date.now()}_${file.name}`;
-                localStorage.setItem(storageKey, JSON.stringify(fileData));
+                // Tạo storage key unique
+                const storageKey = `vgmedia_upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
                 
-                resolve({
-                    success: true,
-                    storageKey: storageKey,
-                    fileName: file.name,
-                    fileType: file.type,
-                    fileSize: this.formatFileSize(file.size),
-                    dataUrl: e.target.result,
-                    isAudio: isAudio
-                });
+                try {
+                    localStorage.setItem(storageKey, JSON.stringify(fileData));
+                    console.log('✅ File saved to localStorage:', storageKey);
+                    
+                    resolve({
+                        success: true,
+                        storageKey: storageKey,
+                        fileName: file.name,
+                        fileType: file.type,
+                        fileSize: this.formatFileSize(file.size),
+                        dataUrl: e.target.result,
+                        isAudio: isAudio
+                    });
+                } catch (error) {
+                    console.error('❌ LocalStorage error:', error);
+                    
+                    // Nếu localStorage đầy, thử xóa file cũ
+                    this.cleanupOldUploads();
+                    
+                    // Thử lại
+                    try {
+                        localStorage.setItem(storageKey, JSON.stringify(fileData));
+                        resolve({
+                            success: true,
+                            storageKey: storageKey,
+                            fileName: file.name,
+                            fileType: file.type,
+                            fileSize: this.formatFileSize(file.size),
+                            dataUrl: e.target.result,
+                            isAudio: isAudio
+                        });
+                    } catch (retryError) {
+                        reject(new Error('LocalStorage đã đầy. Vui lòng xóa bớt file cũ.'));
+                    }
+                }
             };
             
             reader.onerror = () => {
                 reject(new Error('Lỗi đọc file'));
             };
             
-            if (isAudio) {
-                // Đọc dưới dạng Data URL cho audio
-                reader.readAsDataURL(file);
-            } else {
-                // Đọc dưới dạng Data URL cho ảnh
-                reader.readAsDataURL(file);
-            }
+            // Đọc dưới dạng Data URL
+            reader.readAsDataURL(file);
         });
     }
     
-    // Lấy metadata từ file audio
-    async getAudioMetadata(file) {
-        return new Promise((resolve) => {
-            const audio = document.createElement('audio');
-            audio.preload = 'metadata';
-            
-            audio.onloadedmetadata = () => {
-                resolve({
-                    duration: this.formatDuration(audio.duration),
-                    durationSeconds: audio.duration,
-                    sampleRate: '44100 Hz', // Mặc định
-                    channels: 2, // Stereo
-                    bitrate: '320 kbps' // Mặc định
-                });
-            };
-            
-            audio.onerror = () => {
-                resolve({
-                    duration: '0:00',
-                    durationSeconds: 0,
-                    sampleRate: 'Unknown',
-                    channels: 2,
-                    bitrate: 'Unknown'
-                });
-            };
-            
-            // Tạo URL tạm thời từ file
-            const url = URL.createObjectURL(file);
-            audio.src = url;
-            
-            // Cleanup sau 30 giây
-            setTimeout(() => {
-                URL.revokeObjectURL(url);
-            }, 30000);
-        });
+    // Dọn dẹp uploads cũ
+    cleanupOldUploads() {
+        console.log('🧹 Cleaning up old uploads...');
+        const cutoffTime = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 ngày trước
+        
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('vgmedia_upload_')) {
+                try {
+                    const data = JSON.parse(localStorage.getItem(key));
+                    if (new Date(data.uploadedAt).getTime() < cutoffTime) {
+                        localStorage.removeItem(key);
+                        console.log('🗑️ Removed old upload:', key);
+                    }
+                } catch (e) {
+                    // Bỏ qua lỗi
+                }
+            }
+        }
     }
     
     // Format file size
@@ -159,8 +201,14 @@ class FileUploaderEnhanced {
         title = title.replace(/[_-]/g, ' ');
         title = title.replace(/^\d+\s*[-.]\s*/, '');
         
-        // Remove common tags
-        const tags = ['official', 'video', 'audio', 'lyric', 'lyrics', 'remix', 'mix', 'edit', 'version'];
+        // Remove common audio tags
+        const tags = [
+            'official', 'video', 'audio', 'lyric', 'lyrics', 
+            'remix', 'mix', 'edit', 'version', 'full', 'hd',
+            '320kbps', '256kbps', '128kbps', 'high quality',
+            'extended', 'radio', 'club', 'dub', 'instrumental'
+        ];
+        
         tags.forEach(tag => {
             const regex = new RegExp(`\\s*${tag}\\s*`, 'gi');
             title = title.replace(regex, ' ');
@@ -179,7 +227,7 @@ class FileUploaderEnhanced {
         const files = [];
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
-            if (key.startsWith('vgmedia_uploads_')) {
+            if (key.startsWith('vgmedia_upload_')) {
                 try {
                     const fileData = JSON.parse(localStorage.getItem(key));
                     files.push({
